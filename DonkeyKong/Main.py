@@ -3,7 +3,6 @@ from PyQt5.QtGui import QImage, QPalette, QBrush, QPixmap
 from PyQt5.QtCore import QSize, Qt
 import sys
 
-
 class Mover(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
