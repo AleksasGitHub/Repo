@@ -10,20 +10,6 @@ import threading
 from threading import Thread
 
 
-class PrincessWave(QLabel):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setGeometry(260, 20, 70, 70)
-        pix = QPixmap('wave.png')
-        pixx = pix.scaled(QSize(70, 70))
-        self.setPixmap(pixx)
-
-    def wave_function(self,):
-        while 1:
-
-         time.sleep(1)
-
-
 class Princess(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -31,6 +17,19 @@ class Princess(QLabel):
         pix = QPixmap('peach2.png')
         pixx = pix.scaled(QSize(70, 70))
         self.setPixmap(pixx)
+        self.th = Thread(target=self.wave, args=())
+        self.th.start()
+
+    def wave(self):
+        while True:
+            pix = QPixmap('wave.png')
+            pixx = pix.scaled(QSize(70, 70))
+            self.setPixmap(pixx)
+            time.sleep(0.5)
+            pix2 = QPixmap('peach2.png')
+            pixx2 = pix2.scaled(QSize(70, 70))
+            self.setPixmap(pixx2)
+            time.sleep(0.5)
 
 
 class Mover(QLabel):
