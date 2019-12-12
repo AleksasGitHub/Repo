@@ -10,6 +10,34 @@ import threading
 from threading import Thread
 
 
+class DonkeyKong(QLabel):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setGeometry(290, 20, 70, 70)
+        pix = QPixmap('doKo.png')
+        pixx = pix.scaled(QSize(70, 70))
+        self.setPixmap(pixx)
+        self.th = Thread(target=self.moveRandom, args=())
+        self.th.start()
+
+    def moveRandom(self):
+        while True:
+            i = random.randrange(0, 101, 1) % 2
+            if i == 0:
+                if self.x() - 10 >= -25:
+                    self.move(self.x() - 10, self.y())
+                    pix = QPixmap('doKo.png')
+                    pixx = pix.scaled(QSize(70, 70))
+                    self.setPixmap(pixx)
+            else:
+                if self.x() + 10 <= 532:
+                    self.move(self.x() + 10, self.y())
+                    pix = QPixmap('doKo.png')
+                    pixx = pix.scaled(QSize(70, 70))
+                    self.setPixmap(pixx)
+            time.sleep(0.5)
+
+
 class Princess(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -30,6 +58,7 @@ class Princess(QLabel):
             pixx2 = pix2.scaled(QSize(70, 70))
             self.setPixmap(pixx2)
             time.sleep(0.5)
+
 
 
 class Mover(QLabel):

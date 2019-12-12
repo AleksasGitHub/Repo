@@ -1,6 +1,5 @@
 __author__ = 'Erilyth'
 import pygame
-from Person import Person
 import random
 
 '''
@@ -9,7 +8,7 @@ Each donkey kong can only move on the top floor and cannot move vertically.
 '''
 
 
-class DonkeyKong(Person):
+class DonkeyKong():
     def __init__(self, raw_image, position):
         super(DonkeyKong, self).__init__(raw_image, position)
         self.__speed = 2
