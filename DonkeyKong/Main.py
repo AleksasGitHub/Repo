@@ -60,7 +60,6 @@ class Princess(QLabel):
             time.sleep(0.5)
 
 
-
 class Mover(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -69,12 +68,19 @@ class Mover(QLabel):
         pixx = pix.scaled(QSize(70, 70))
         self.setPixmap(pixx)
 
+    def getPosition(self):
+        self.playerX = self.mover.x()
+        self.playerY = self.mover.y()
+
     def keyPressEvent(self, event):
+        self.getPosition()
         if event.key() == Qt.Key_Up:
-            self.move(self.x(), self.y() - 15)
+            if MainWindow.map[self.x()][self.y()] == 5: #Provera da li se nalazi na merdevinama
+                self.move(self.x(), self.y() - 15)
         elif event.key() == Qt.Key_Down:
             if self.y() + 15 <= 610:
-                self.move(self.x(), self.y() + 15)
+                if MainWindow.map[self.x()][self.y()] == 5: #Provera da li se nalazi na merdevinama
+                    self.move(self.x(), self.y() + 15)
         elif event.key() == Qt.Key_Left:
             if self.x() - 5 >= -25:
                 self.move(self.x() - 5, self.y())
