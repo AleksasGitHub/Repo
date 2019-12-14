@@ -61,38 +61,74 @@ class Princess(QLabel):
 
 
 class Mover(QLabel):
-    def __init__(self, parent=None):
+    def __init__(self, map, parent=None):
         super().__init__(parent)
-        self.setGeometry(0, 608, 70, 70)
+        self.setGeometry(-8, 621, 50, 70)
         pix = QPixmap('ItsAMeRight.png')
-        pixx = pix.scaled(QSize(70, 70))
+        pixx = pix.scaled(QSize(50, 70))
         self.setPixmap(pixx)
+        self.map = map
+        self.PlayerX = 0
+        self.PlayerY = 0
 
     def getPosition(self):
-        self.playerX = self.mover.x()
-        self.playerY = self.mover.y()
+        self.playerDrawn = 0
+        for x in range(len(self.map)):
+            for y in range(len(self.map[x])):
+                if self.map[x][y] == 3 or self.map[x][y] == 5:
+                    if self.playerDrawn == 0:
+                        self.playerDrawn = 1
+                    else:
+                        self.PlayerX = x
+                        self.PlayerY = y
+                        return
+
+    def printMap(self):
+        for x in range(len(self.map)):
+            row = []
+            for y in range(len(self.map[x])):
+                row.append(self.map[x][y])
+            print(row)
 
     def keyPressEvent(self, event):
         self.getPosition()
         if event.key() == Qt.Key_Up:
-            if MainWindow.map[self.x()][self.y()] == 5: #Provera da li se nalazi na merdevinama
-                self.move(self.x(), self.y() - 15)
+            if self.map[self.PlayerX][self.PlayerY] == 5:
+                self.move(self.x(), self.y() - 19)
+                self.map[self.PlayerX][self.PlayerY] = self.map[self.PlayerX][self.PlayerY] - 3
+                self.map[self.PlayerX - 2][self.PlayerY] = self.map[self.PlayerX - 2][self.PlayerY] + 3
+                self.printMap()
         elif event.key() == Qt.Key_Down:
-            if self.y() + 15 <= 610:
-                if MainWindow.map[self.x()][self.y()] == 5: #Provera da li se nalazi na merdevinama
-                    self.move(self.x(), self.y() + 15)
+            if self.y() + 19 <= 630:
+                if self.map[self.PlayerX+1][self.PlayerY] == 5 or self.map[self.PlayerX + 1][self.PlayerY] == 2:
+                    self.move(self.x(), self.y() + 19)
+                    self.map[self.PlayerX + 1][self.PlayerY] = self.map[self.PlayerX + 1][self.PlayerY] + 3
+                    self.map[self.PlayerX - 1][self.PlayerY] = self.map[self.PlayerX - 1][self.PlayerY] - 3
+                    self.printMap()
         elif event.key() == Qt.Key_Left:
-            if self.x() - 5 >= -25:
-                self.move(self.x() - 5, self.y())
-                pix = QPixmap('ItsAMeLeft.png')
-                pixx = pix.scaled(QSize(70, 70))
-                self.setPixmap(pixx)
+            if self.x() - 18 >= -8:
+                if not (self.map[self.PlayerX+1][self.PlayerY] == 2 and self.map[self.PlayerX + 1][self.PlayerY+1] == 0):
+                    self.move(self.x() - 18, self.y())
+                    pix = QPixmap('ItsAMeLeft.png')
+                    pixx = pix.scaled(QSize(50, 70))
+                    self.setPixmap(pixx)
+                    self.map[self.PlayerX][self.PlayerY] = self.map[self.PlayerX][self.PlayerY] - 3
+                    self.map[self.PlayerX-1][self.PlayerY] = self.map[self.PlayerX-1][self.PlayerY] - 3
+                    self.map[self.PlayerX][self.PlayerY-1] = self.map[self.PlayerX][self.PlayerY-1] + 3
+                    self.map[self.PlayerX-1][self.PlayerY-1] = self.map[self.PlayerX-1][self.PlayerY-1] + 3
+                    self.printMap()
         elif event.key() == Qt.Key_Right:
-            if self.x() + 5 <= 532:
-                self.move(self.x() + 5, self.y())
-                pix = QPixmap('ItsAMeRight.png')
-                pixx = pix.scaled(QSize(70, 70))
-                self.setPixmap(pixx)
+            if self.x() + 18 <= 532:
+                if not (self.map[self.PlayerX + 1][self.PlayerY] == 2 and self.map[self.PlayerX + 1][self.PlayerY + 1] == 0):
+                    self.move(self.x() + 18, self.y())
+                    pix = QPixmap('ItsAMeRight.png')
+                    pixx = pix.scaled(QSize(50, 70))
+                    self.setPixmap(pixx)
+                    self.map[self.PlayerX][self.PlayerY] = self.map[self.PlayerX][self.PlayerY] - 3
+                    self.map[self.PlayerX-1][self.PlayerY] = self.map[self.PlayerX-1][self.PlayerY] - 3
+                    self.map[self.PlayerX][self.PlayerY+1] = self.map[self.PlayerX][self.PlayerY+1] + 3
+                    self.map[self.PlayerX-1][self.PlayerY+1] = self.map[self.PlayerX-1][self.PlayerY+1] + 3
+                    self.printMap()
         else:
             QLabel.keyPressEvent(self, event)
 
@@ -102,79 +138,55 @@ class MainWindow(QWidget):
         super().__init__()
         self.initUI()
 
-    def makeMap(self):
-        for i in range(0, self._height // 15 + 1):
-            row = []
-            for j in range(0, self._width // 15):
-                row.append(0)
-            self.map.append(row)
-
-    def makeWalls(self): # Wall = 1
-        for i in range(0, (self._height // 15) - 4):
-            self.map[i][0] = self.map[i][self._width // 15 - 1] = 1
-        for i in range(0, (self._height // (15 * 5))):
-            for j in range(0, self._width // 15):
-                self.map[i * 5][j] = 1
-
-    def makeLadders(self): # Ladder = 2
-        for i in range(1, (self._height // (15 * 5) - 1)):
-            ladderPos = math.floor(random.random() * (self._width / 30))
-            ladderPos = int(10 + ladderPos)
-            for k in range(0, 5):
-                self.map[i * 5 + k][ladderPos] = self.map[i * 5 + k][32 - ladderPos] = 2
-
-    def makePlayer(self): # Player = 3
-        self.map[34][1] = self.map[33][1] = 3
-
-    def drawImages(self):
-        self.playerDrawn = 0
-        for x in range(len(self.map)):
-            for y in range(len(self.map[x])):
-                if self.map[x][y] == 1:
-                    wallLabel = QLabel()
-                    pix = QPixmap('wood_block.png')
-                    pixx = pix.scaled(QSize(self.image_size, self.image_size))
-                    wallLabel.setPixmap(pixx)
-                    wallLabel.move(y * 15 + 15 / 2, x * 15 + 15 / 2)
-                    self.hbox.addWidget(wallLabel, x * 15 + 15 / 2, y * 15 + 15 / 2)
-
-                if self.map[x][y] == 2:
-                    ladderLabel = QLabel()
-                    pix = QPixmap('ladder.png')
-                    pixx = pix.scaled(QSize(self.image_size, self.image_size))
-                    ladderLabel.setPixmap(pixx)
-                    ladderLabel.move(y * 15 + 15 / 2, x * 15 + 15 / 2)
-                    self.hbox.addWidget(ladderLabel, x * 15 + 15 / 2, y * 15 + 15 / 2)
-
-                if self.map[x][y] == 3:
-                    if self.playerDrawn == 0:
-                        self.playerDrawn = 1
-                    else:
-                        playerLabel = QLabel()
-                        pix = QPixmap('ItsAMeRight.png')
-                        pixx = pix.scaled(QSize(self.image_size, self.image_size))
-                        playerLabel.setPixmap(pixx)
-                        playerLabel.move(y * 15 + 15 / 2, x * 15 + 15 / 2)
-                        self.hbox.addWidget(playerLabel, x * 15 + 15 / 2, y * 15 + 15 / 2)
-
-    # def clearScreen(self):
-    # Clear previous screen
-
-    def initializeBoard(self):
-        # self.clearScreen()
-        self.makeMap()
-        self.makeWalls()
-        self.makeLadders()
-        self.makePlayer()
-        self.drawImages()
-
     def initUI(self):
         self.startButton = QPushButton("New Game", self)
         self.startButton.resize(100, 32)
         self.startButton.move(100, 500)
         self.startButton.clicked.connect(self.on_start)
 
-        self.map = []
+        self.map = \
+            [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1],
+             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
+             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
         self._height = 600
         self._width = 500
         self.image_size = 18
@@ -205,16 +217,15 @@ class MainWindow(QWidget):
         self.setPalette(palette)
         self.startButton.hide()
 
-        self.initializeBoard()
         self.PrincessWidget = QWidget()
         self.MarioWidget = QWidget()
 
-        #self.PrincessWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        #self.hbox.addWidget(self.PrincessWidget, 1, 1)
-        #self.MarioWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-        #self.hbox.addWidget(self.MarioWidget, 34 * 15 + 15 / 2, 1 * 15 + 15 / 2)
+        # self.PrincessWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.hbox.addWidget(self.PrincessWidget, 1, 1)
+        # self.MarioWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.hbox.addWidget(self.MarioWidget, 1, 1)
 
-        self.mover = Mover(self.MarioWidget)
+        self.mover = Mover(self.map, self.MarioWidget)
         self.princess = Princess(self.PrincessWidget)
         self.mover.setFocus()
 
