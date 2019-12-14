@@ -11,39 +11,58 @@ from threading import Thread
 
 
 class DonkeyKong(QLabel):
-    def __init__(self, parent=None):
+    def __init__(self, map, parent=None):
         super().__init__(parent)
-        self.setGeometry(290, 20, 70, 70)
+        self.setGeometry(262, 112, 70, 80)
         pix = QPixmap('doKo.png')
-        pixx = pix.scaled(QSize(70, 70))
+        pixx = pix.scaled(QSize(70, 80))
         self.setPixmap(pixx)
         self.th = Thread(target=self.moveRandom, args=())
         self.th.start()
+        self.map = map
+        self.DonkeyX = 0
+        self.DonkeyY = 0
+
+    def getPosition(self):
+        for x in range(len(self.map)):
+            for y in range(len(self.map[x])):
+                if self.map[x][y] == 3 or self.map[x][y] == 5:
+                    if self.playerDrawn == 0:
+                        self.playerDrawn = 1
+                    else:
+                        self.DonkeyX = x
+                        self.DonkeyY = y
+                        return
 
     def moveRandom(self):
         while True:
-            i = random.randrange(0, 101, 1) % 2
+            i = 1
+            #i = random.randrange(0, 101, 1) % 2
             if i == 0:
-                if self.x() - 10 >= -25:
-                    self.move(self.x() - 10, self.y())
-                    pix = QPixmap('doKo.png')
-                    pixx = pix.scaled(QSize(70, 70))
-                    self.setPixmap(pixx)
+                for j in range (0, 3):
+                    if self.x() - 18 >= 0:
+                        self.move(self.x() - 18, self.y())
+                        pix = QPixmap('doKo.png')
+                        pixx = pix.scaled(QSize(70, 80))
+                        self.setPixmap(pixx)
+                        time.sleep(0.5)
             else:
-                if self.x() + 10 <= 532:
-                    self.move(self.x() + 10, self.y())
-                    pix = QPixmap('doKo.png')
-                    pixx = pix.scaled(QSize(70, 70))
-                    self.setPixmap(pixx)
-            time.sleep(0.5)
+                for j in range(0, 3):
+                    if self.x() + 18 <= 510:
+                        self.move(self.x() + 18, self.y())
+                        pix = QPixmap('doKo.png')
+                        pixx = pix.scaled(QSize(70, 80))
+                        self.setPixmap(pixx)
+                        time.sleep(0.5)
+            #time.sleep(0.5)
 
 
 class Princess(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setGeometry(260, 20, 70, 70)
+        self.setGeometry(260, 20, 50, 70)
         pix = QPixmap('peach2.png')
-        pixx = pix.scaled(QSize(70, 70))
+        pixx = pix.scaled(QSize(50, 70))
         self.setPixmap(pixx)
         self.th = Thread(target=self.wave, args=())
         self.th.start()
@@ -51,11 +70,11 @@ class Princess(QLabel):
     def wave(self):
         while True:
             pix = QPixmap('wave.png')
-            pixx = pix.scaled(QSize(70, 70))
+            pixx = pix.scaled(QSize(50, 70))
             self.setPixmap(pixx)
             time.sleep(0.5)
             pix2 = QPixmap('peach2.png')
-            pixx2 = pix2.scaled(QSize(70, 70))
+            pixx2 = pix2.scaled(QSize(50, 70))
             self.setPixmap(pixx2)
             time.sleep(0.5)
 
@@ -151,10 +170,10 @@ class MainWindow(QWidget):
              [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
              [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
              [1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1],
-             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
              [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
              [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
              [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -219,14 +238,18 @@ class MainWindow(QWidget):
 
         self.PrincessWidget = QWidget()
         self.MarioWidget = QWidget()
+        self.DonkeyWidget = QWidget()
 
         # self.PrincessWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.hbox.addWidget(self.PrincessWidget, 1, 1)
         # self.MarioWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.hbox.addWidget(self.MarioWidget, 1, 1)
+        # self.DonkeyWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.hbox.addWidget(self.DonkeyWidget, 1, 1)
 
         self.mover = Mover(self.map, self.MarioWidget)
         self.princess = Princess(self.PrincessWidget)
+        self.donkey = DonkeyKong(self.map, self.DonkeyWidget)
         self.mover.setFocus()
 
 
