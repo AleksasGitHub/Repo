@@ -1,102 +1,75 @@
-__author__ = 'Erilyth'
-import pygame
+import math
 import random
 
-'''
-This class defines all the Donkey Kongs present in our game.
-Each donkey kong can only move on the top floor and cannot move vertically.
-'''
+from PyQt5.QtWidgets import QWidget, QMainWindow, QPushButton, QHBoxLayout, QApplication, QLabel, QVBoxLayout, QGridLayout, QSizePolicy
+from PyQt5.QtGui import QImage, QPalette, QBrush, QPixmap
+from PyQt5.QtCore import QSize, Qt
+from PyQt5 import QtWidgets, QtGui
+import sys
+import time
+from tkinter import *
+import threading
+from threading import Thread
 
 
-class DonkeyKong():
-    def __init__(self, raw_image, position):
-        super(DonkeyKong, self).__init__(raw_image, position)
-        self.__speed = 2
-        self.__direction = int(random.random() * 100) % 2
-        self.__cycles = 0
-        self.__stopDuration = 0
 
-    # Getters and Setters
-    def getSpeed(self):
-        return self.__speed
 
-    def setSpeed(self):
-        return self.__speed
 
-    def getStopDuration(self):
-        return self.__stopDuration
+class DonkeyKong(QLabel):
+    def __init__(self, map, parent=None):
+        super().__init__(parent)
+        self.map = map
+        self.DonkeyX = 0
+        self.DonkeyY = 0
+        self.setGeometry(262, 112, 70, 80)
+        pix = QPixmap('doKo.png')
+        pixx = pix.scaled(QSize(70, 80))
+        self.setPixmap(pixx)
+        self.th = Thread(target=self.moveRandom, args=())
+        self.th.start()
 
-    def setStopDuration(self, stopDuration):
-        self.__stopDuration = stopDuration
+    def getPosition(self):
+        for x in range(len(self.map)):
+            for y in range(len(self.map[x])):
+                if self.map[x][y] == 6 or self.map[x][y] == 8 or self.map[x][y] >= 9:
+                        self.DonkeyX = x
+                        self.DonkeyY = y
+                        return
 
-    # Checks for collisions with walls in order to change direction when hit by a wall
-    def checkWall(self, colliderGroup):
-        if self.__direction == 0:
-            self.updateWH(self.image, "H", 20, 40, 40)  # Right collision with wall
-        if self.__direction == 1:
-            self.updateWH(self.image, "H", -20, 40, 40)  # Left collision with wall
-        Colliders = pygame.sprite.spritecollide(self, colliderGroup, False)
-        if self.__direction == 0:
-            self.updateWH(self.image, "H", -20, 40, 40)  # Right collision with wall
-        if self.__direction == 1:
-            self.updateWH(self.image, "H", 20, 40, 40)  # Left collision with wall
-        return Colliders
+    def printMap(self):
+        for x in range(len(self.map)):
+            row = []
+            for y in range(len(self.map[x])):
+                row.append(self.map[x][y])
+            print(row)
 
-    # This is used to animate the donkey kong
-    def continuousUpdate(self, GroupList, GroupList2):
-
-        # If the stop duration is 0 then kong is currently moving either left or right
-        if self.__stopDuration == 0:
-
-            # Currently moving right
-            if self.__direction == 0:
-                self.__cycles += 1
-                if self.__cycles % 24 < 6:
-                    self.updateWH(pygame.image.load('kong0.png'), "H", self.__speed, 40, 40)
-                elif self.__cycles % 24 < 12:
-                    self.updateWH(pygame.image.load('kong1.png'), "H", self.__speed, 40, 40)
-                elif self.__cycles % 24 < 18:
-                    self.updateWH(pygame.image.load('kong2.png'), "H", self.__speed, 40, 40)
-                else:
-                    self.updateWH(pygame.image.load('kong3.png'), "H", self.__speed, 40, 40)
-                if self.checkWall(GroupList):
-                    self.__direction = 1
-                    self.__cycles = 0
-                    self.updateWH(self.image, "H", -self.__speed, 40, 40)
-
-            # Currently moving left
+    def moveRandom(self):
+        while True:
+            i = random.randrange(0, 101, 1) % 2
+            times = random.randrange(3, 5)
+            if i == 0:
+                for j in range(0, times):
+                    if self.x() - 18 >= 0:
+                        self.getPosition()
+                        self.move(self.x() - 18, self.y())
+                        pix = QPixmap('doKo.png')
+                        pixx = pix.scaled(QSize(70, 80))
+                        self.setPixmap(pixx)
+                        for k in range(0, 4):
+                            self.map[self.DonkeyX + k][self.DonkeyY - 1] = self.map[self.DonkeyX + k][self.DonkeyY - 1] + 6
+                            self.map[self.DonkeyX + k][self.DonkeyY + 3] = self.map[self.DonkeyX + k][self.DonkeyY + 3] - 6
+                        #self.printMap()
+                        time.sleep(0.5)
             else:
-                self.__cycles += 1
-                if self.__cycles % 24 < 6:
-                    self.updateWH(pygame.image.load('kong01.png'), "H", -self.__speed, 45, 45)
-                elif self.__cycles % 24 < 12:
-                    self.updateWH(pygame.image.load('kong11.png'), "H", -self.__speed, 45, 45)
-                elif self.__cycles % 24 < 18:
-                    self.updateWH(pygame.image.load('kong21.png'), "H", -self.__speed, 45, 45)
-                else:
-                    self.updateWH(pygame.image.load('kong31.png'), "H", -self.__speed, 45, 45)
-                if self.checkWall(GroupList):
-                    self.__direction = 0
-                    self.__cycles = 0
-                    self.updateWH(self.image, "H", self.__speed, 45, 45)
-
-        # Donkey Kong is currently not moving, which means he is launching a fireball
-        else:
-            self.__stopDuration -= 1
-            if self.__stopDuration == 0:  # Once he finishes launching a fireball, we go back to our normal movement animation
-                self.updateWH(self.image, "V", 12, 50, 50)
-            if self.__stopDuration >= 10:
-                if self.__direction == 0:
-                    self.updateWH(pygame.image.load('kongstill0.png'), "H", 0, 50, 50)
-                else:
-                    self.updateWH(pygame.image.load('kongstill10.png'), "H", 0, 50, 50)
-            elif self.__stopDuration >= 5:
-                if self.__direction == 0:
-                    self.updateWH(pygame.image.load('kongstill1.png'), "H", 0, 50, 50)
-                else:
-                    self.updateWH(pygame.image.load('kongstill11.png'), "H", 0, 50, 50)
-            else:
-                if self.__direction == 0:
-                    self.updateWH(pygame.image.load('kongstill0.png'), "H", 0, 50, 50)
-                else:
-                    self.updateWH(pygame.image.load('kongstill10.png'), "H", 0, 50, 50)
+                for j in range(0, times):
+                    if self.x() + 18 <= 510:
+                        self.getPosition()
+                        self.move(self.x() + 18, self.y())
+                        pix = QPixmap('doKo.png')
+                        pixx = pix.scaled(QSize(70, 80))
+                        self.setPixmap(pixx)
+                        for k in range(0, 4):
+                            self.map[self.DonkeyX + k][self.DonkeyY + 4] = self.map[self.DonkeyX + k][self.DonkeyY + 4] + 6
+                            self.map[self.DonkeyX + k][self.DonkeyY] = self.map[self.DonkeyX + k][self.DonkeyY] - 6
+                        #self.printMap()
+                        time.sleep(0.5)
