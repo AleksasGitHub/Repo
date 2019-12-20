@@ -19,17 +19,17 @@ class Lives(QLabel):
         self.lives = lives
         if self.lives == 3:
             self.setGeometry(9, 10, 100, 70)
-            pix = QPixmap('3hearts.jpg')
+            pix = QPixmap('Images/3hearts.jpg')
             pixx = pix.scaled(QSize(100, 70))
             self.setPixmap(pixx)
         elif self.lives == 2:
             self.setGeometry(9, 10, 100, 70)
-            pix = QPixmap('2hearts.jpg')
+            pix = QPixmap('Images/2hearts.jpg')
             pixx = pix.scaled(QSize(100, 70))
             self.setPixmap(pixx)
         elif self.lives == 1:
             self.setGeometry(9, 10, 100, 70)
-            pix = QPixmap('1heart.jpg')
+            pix = QPixmap('Images/1heart.jpg')
             pixx = pix.scaled(QSize(100, 70))
             self.setPixmap(pixx)
 

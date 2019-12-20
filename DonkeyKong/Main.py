@@ -19,7 +19,7 @@ from threading import Thread
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowIcon(QtGui.QIcon('doKo.png'))
+        self.setWindowIcon(QtGui.QIcon('Images/doKo.png'))
         self.setWindowTitle("Donkey Kong")
         self.initUI()
 
@@ -83,7 +83,7 @@ class MainWindow(QWidget):
         self._width = 500
         self.image_size = 18
 
-        oImage = QImage("dk1.png")
+        oImage = QImage("Images/dk1.png")
         sImage = oImage.scaled(QSize(600, 700))
         palette = QPalette()
         palette.setBrush(QPalette.Window, QBrush(sImage))
@@ -106,7 +106,7 @@ class MainWindow(QWidget):
         self.close()
 
     def on_start(self):
-        oImage = QImage("Background2.png")
+        oImage = QImage("Images/Background2.png")
         sImage = oImage.scaled(QSize(600, 700))
         palette = QPalette()
         palette.setBrush(QPalette.Window, QBrush(sImage))
@@ -119,16 +119,15 @@ class MainWindow(QWidget):
         self.DonkeyWidget = QWidget()
         self.LivesWidget = QWidget()
 
-
         self.hbox.addWidget(self.PrincessWidget, 1, 1)
         self.hbox.addWidget(self.MarioWidget, 1, 1)
         self.hbox.addWidget(self.DonkeyWidget, 1, 1)
         self.hbox.addWidget(self.LivesWidget, 1, 1)
 
         self.livesWidget = Lives(self.lives, self.LivesWidget)
-        self.mover = Mover(self.map, self.livesWidget, self.MarioWidget)
-        self.princess = Princess(self.PrincessWidget)
         self.donkey = DonkeyKong(self.map, self.DonkeyWidget)
+        self.mover = Mover(self.map, self.livesWidget, self.donkey, self.MarioWidget)
+        self.princess = Princess(self.PrincessWidget)
 
         self.mover.setFocus()
 

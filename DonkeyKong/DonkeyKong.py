@@ -12,9 +12,6 @@ import threading
 from threading import Thread
 
 
-
-
-
 class DonkeyKong(QLabel):
     def __init__(self, map, parent=None):
         super().__init__(parent)
@@ -22,7 +19,7 @@ class DonkeyKong(QLabel):
         self.DonkeyX = 0
         self.DonkeyY = 0
         self.setGeometry(262, 112, 70, 80)
-        pix = QPixmap('doKo.png')
+        pix = QPixmap('Images/doKo.png')
         pixx = pix.scaled(QSize(70, 80))
         self.setPixmap(pixx)
         self.th = Thread(target=self.moveRandom, args=())
@@ -52,7 +49,7 @@ class DonkeyKong(QLabel):
                     if self.x() - 18 >= 0:
                         self.getPosition()
                         self.move(self.x() - 18, self.y())
-                        pix = QPixmap('doKo.png')
+                        pix = QPixmap('Images/doKo.png')
                         pixx = pix.scaled(QSize(70, 80))
                         self.setPixmap(pixx)
                         for k in range(0, 4):
@@ -65,7 +62,7 @@ class DonkeyKong(QLabel):
                     if self.x() + 18 <= 510:
                         self.getPosition()
                         self.move(self.x() + 18, self.y())
-                        pix = QPixmap('doKo.png')
+                        pix = QPixmap('Images/doKo.png')
                         pixx = pix.scaled(QSize(70, 80))
                         self.setPixmap(pixx)
                         for k in range(0, 4):

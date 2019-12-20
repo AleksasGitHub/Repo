@@ -11,11 +11,12 @@ from tkinter import *
 import threading
 from threading import Thread
 
+
 class Princess(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setGeometry(260, 20, 50, 70)
-        pix = QPixmap('peach2.png')
+        pix = QPixmap('Images/peach2.png')
         pixx = pix.scaled(QSize(50, 70))
         self.setPixmap(pixx)
         self.th = Thread(target=self.wave, args=())
@@ -23,11 +24,11 @@ class Princess(QLabel):
 
     def wave(self):
         while True:
-            pix = QPixmap('wave.png')
+            pix = QPixmap('Images/wave.png')
             pixx = pix.scaled(QSize(50, 70))
             self.setPixmap(pixx)
             time.sleep(0.5)
-            pix2 = QPixmap('peach2.png')
+            pix2 = QPixmap('Images/peach2.png')
             pixx2 = pix2.scaled(QSize(50, 70))
             self.setPixmap(pixx2)
             time.sleep(0.5)

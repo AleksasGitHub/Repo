@@ -1,5 +1,6 @@
 import pygame
 
+
 class OnBoard(pygame.sprite.Sprite):
     def __init__(self, raw_image, position):
         super(OnBoard, self).__init__()
