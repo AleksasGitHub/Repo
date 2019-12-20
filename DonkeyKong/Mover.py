@@ -14,7 +14,7 @@ from threading import Thread
 
 
 class Mover(QLabel):
-    def __init__(self, map, livesWidget, donkeyKong, parent=None):
+    def __init__(self, map, livesWidget, donkeyKong,scoreLabel,score, parent=None):
         super().__init__(parent)
         self.setGeometry(-8, 621, 50, 70)
         pix = QPixmap('Images/ItsAMeRight.png')
@@ -24,7 +24,10 @@ class Mover(QLabel):
         self.PlayerX = 0
         self.PlayerY = 0
         self.lives = 3
+        self.platformsList = []
         self.donkey = donkeyKong
+        self.scoreLabel = scoreLabel
+        self.score = score
         self.th = Thread(target=self.check_lives, args=(livesWidget, self.donkey,))
         self.th.start()
 
@@ -33,8 +36,6 @@ class Mover(QLabel):
             self.getPosition()
             if self.map[self.PlayerX][self.PlayerY] >= 9 or self.map[self.PlayerX - 1][self.PlayerY] >= 9:
                 self.printMap()
-                #self.map[self.PlayerX][self.PlayerY] = self.map[self.PlayerX][self.PlayerY] - 3
-                #self.map[self.PlayerX - 1][self.PlayerY] = self.map[self.PlayerX - 1][self.PlayerY] - 3
                 self.setGeometry(-8, 621, 50, 70)
                 pix = QPixmap('Images/ItsAMeRight.png')
                 pixx = pix.scaled(QSize(50, 70))
@@ -114,15 +115,26 @@ class Mover(QLabel):
                 row.append(self.map[x][y])
             print(row)
 
+    def check_score(self, previousX, newX):
+        if previousX == 5 or previousX == 10 or previousX == 15 or previousX == 20 or previousX == 25 or previousX == 30:
+            if not(newX == 5 or newX == 10 or newX == 15 or newX == 20 or newX == 25 or newX == 30):
+                if previousX not in self.platformsList:
+                  self.platformsList.append(previousX)
+                  self.score = self.score + 1
+                  self.scoreLabel.change_score(self.score)
+
+
     def keyPressEvent(self, event):
         self.getPosition()
         if event.key() == Qt.Key_Up:
             if self.map[self.PlayerX][self.PlayerY] == 5:
                 self.move(self.x(), self.y() - 19)
+                self.previousX = self.PlayerX
                 self.map[self.PlayerX][self.PlayerY] = self.map[self.PlayerX][self.PlayerY] - 3
                 self.map[self.PlayerX - 2][self.PlayerY] = self.map[self.PlayerX - 2][self.PlayerY] + 3
-
-                #self.printMap()
+                self.getPosition()
+                self.newX = self.PlayerX
+                self.check_score(self.previousX, self.newX)
         elif event.key() == Qt.Key_Down:
             #self.printMap()
             print(self.PlayerY)
