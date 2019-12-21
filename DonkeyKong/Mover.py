@@ -156,6 +156,7 @@ class Mover(QLabel):
                 livesWidget.lose_life(self.lives)
                 self.score = self.score + 100
                 self.scoreLabel.change_score(self.score)
+                self.platformsList = []
             time.sleep(0.5)
 
 
