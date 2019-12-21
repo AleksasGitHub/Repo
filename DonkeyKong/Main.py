@@ -9,6 +9,7 @@ from Mover import Mover
 from DonkeyKong import DonkeyKong
 from Princess import Princess
 from Lives import Lives
+from  Score import  Score
 import sys
 import time
 from tkinter import *
@@ -114,19 +115,24 @@ class MainWindow(QWidget):
         self.startButton.hide()
         self.exitButton.hide()
         self.lives = 3
+        self.score = 0
+
         self.PrincessWidget = QWidget()
         self.MarioWidget = QWidget()
         self.DonkeyWidget = QWidget()
         self.LivesWidget = QWidget()
+        self.ScoreLabel = QLabel("Score:0", self)
 
+        self.hbox.addWidget(self.ScoreLabel, 1, 1)
         self.hbox.addWidget(self.PrincessWidget, 1, 1)
         self.hbox.addWidget(self.MarioWidget, 1, 1)
         self.hbox.addWidget(self.DonkeyWidget, 1, 1)
         self.hbox.addWidget(self.LivesWidget, 1, 1)
 
+        self.scoreLabel = Score(self.ScoreLabel)
         self.livesWidget = Lives(self.lives, self.LivesWidget)
         self.donkey = DonkeyKong(self.map, self.DonkeyWidget)
-        self.mover = Mover(self.map, self.livesWidget, self.donkey, self.MarioWidget)
+        self.mover = Mover(self.map, self.livesWidget, self.donkey, self.scoreLabel, self.score, self.MarioWidget)
         self.princess = Princess(self.PrincessWidget)
 
         self.mover.setFocus()
