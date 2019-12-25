@@ -18,8 +18,8 @@ class Barrel(QLabel):
         self.map = map
         self.BarrelX = donkeyX + 2
         self.BarrelY = donkeyY + 1
-        self.map[self.BarrelX][self.BarrelY] = self.map[self.BarrelX][self.BarrelY] + 150
-        self.map[self.BarrelX][self.BarrelY + 1] = self.map[self.BarrelX][self.BarrelY + 1] + 150
+        self.map[self.BarrelX][self.BarrelY] = self.map[self.BarrelX][self.BarrelY] + 31
+        self.map[self.BarrelX][self.BarrelY + 1] = self.map[self.BarrelX][self.BarrelY + 1] + 31
         self.setGeometry(200, 100, 70, 50) # naci prave kordinate
         pix = QPixmap('Images/doKo.png')
         pixx = pix.scaled(QSize(70, 50))
@@ -31,7 +31,7 @@ class Barrel(QLabel):
     def getPosition(self):
         for x in range(len(self.map)):
             for y in range(len(self.map[x])):
-                if self.map[x][y] >= 150:
+                if self.map[x][y] == 31 or self.map[x][y] == 47 or self.map[x][y] == 49 or self.map[x][y] == 34 or self.map[x][y] == 36 or self.map[x][y] == 42 or self.map[x][y] == 35 or self.map[x][y] == 37 or self.map[x][y] == 43 or self.map[x][y] == 38 or self.map[x][y] == 40:
                         self.BarrelX = x
                         self.BarrelY = y
                         return
@@ -51,10 +51,10 @@ class Barrel(QLabel):
             pixx = pix.scaled(QSize(70, 50))
             self.setPixmap(pixx)
             if(self.BarrelX < 34):
-                self.map[self.BarrelX + 1][self.BarrelY] = self.map[self.BarrelX + 1][self.BarrelY] + 150
-                self.map[self.BarrelX + 1][self.BarrelY + 1] = self.map[self.BarrelX + 1][self.BarrelY + 1] + 150
-            self.map[self.BarrelX][self.BarrelY] = self.map[self.BarrelX][self.BarrelY] - 150
-            self.map[self.BarrelX][self.BarrelY + 1] = self.map[self.BarrelX][self.BarrelY + 1] - 150
+                self.map[self.BarrelX + 1][self.BarrelY] = self.map[self.BarrelX + 1][self.BarrelY] + 31
+                self.map[self.BarrelX + 1][self.BarrelY + 1] = self.map[self.BarrelX + 1][self.BarrelY + 1] + 31
+            self.map[self.BarrelX][self.BarrelY] = self.map[self.BarrelX][self.BarrelY] - 31
+            self.map[self.BarrelX][self.BarrelY + 1] = self.map[self.BarrelX][self.BarrelY + 1] - 31
             self.printMap()
             time.sleep(0.5)
             self.getPosition()
@@ -77,7 +77,7 @@ class DonkeyKong(QLabel):
     def getPosition(self):
         for x in range(len(self.map)):
             for y in range(len(self.map[x])):
-                if self.map[x][y] == 6 or self.map[x][y] == 8: #or #(self.map[x][y] >= 9 and self.map[x][y] <= 150):
+                if self.map[x][y] == 16 or self.map[x][y] == 18:
                         self.DonkeyX = x
                         self.DonkeyY = y
                         return
@@ -107,8 +107,8 @@ class DonkeyKong(QLabel):
                         pixx = pix.scaled(QSize(70, 80))
                         self.setPixmap(pixx)
                         for k in range(0, 4):
-                            self.map[self.DonkeyX + k][self.DonkeyY - 1] = self.map[self.DonkeyX + k][self.DonkeyY - 1] + 6
-                            self.map[self.DonkeyX + k][self.DonkeyY + 3] = self.map[self.DonkeyX + k][self.DonkeyY + 3] - 6
+                            self.map[self.DonkeyX + k][self.DonkeyY - 1] = self.map[self.DonkeyX + k][self.DonkeyY - 1] + 16
+                            self.map[self.DonkeyX + k][self.DonkeyY + 3] = self.map[self.DonkeyX + k][self.DonkeyY + 3] - 16
                         #self.printMap()
                         time.sleep(0.5)
                 barrelCount = barrelCount + 1
@@ -124,8 +124,8 @@ class DonkeyKong(QLabel):
                             pixx = pix.scaled(QSize(70, 80))
                             self.setPixmap(pixx)
                             for k in range(0, 4):
-                                self.map[self.DonkeyX + k][self.DonkeyY + 4] = self.map[self.DonkeyX + k][self.DonkeyY + 4] + 6
-                                self.map[self.DonkeyX + k][self.DonkeyY] = self.map[self.DonkeyX + k][self.DonkeyY] - 6
+                                self.map[self.DonkeyX + k][self.DonkeyY + 4] = self.map[self.DonkeyX + k][self.DonkeyY + 4] + 16
+                                self.map[self.DonkeyX + k][self.DonkeyY] = self.map[self.DonkeyX + k][self.DonkeyY] - 16
                             #self.printMap()
                             time.sleep(0.5)
                 barrelCount = barrelCount + 1
