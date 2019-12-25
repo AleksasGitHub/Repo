@@ -12,6 +12,48 @@ import threading
 from threading import Thread
 
 
+class Barrel(QLabel):
+    def __init__(self, map, donkeyX, donkeyY, parent = None):
+        super().__init__(parent)
+        self.map = map
+        self.BarrelX = donkeyX + 2
+        self.BarrelY = donkeyY + 1
+        self.setGeometry((donkeyX + 1)*15,(donkeyY + 1)*15, 70, 50)
+        pix = QPixmap('Images/Barrel.png')
+        pixx = pix.scaled(QSize(70, 50))
+        self.setPixmap(pixx)
+        self.th = Thread(target=self.Fall, args=())
+        self.th.start()
+
+    def getPosition(self):
+        for x in range(len(self.map)):
+            for y in range(len(self.map[x])):
+                if self.map[x][y] >= 150:
+                        self.BarrelX = x
+                        self.BarrelY = y
+                        return
+
+    def printMap(self):
+        for x in range(len(self.map)):
+            row = []
+            for y in range(len(self.map[x])):
+                row.append(self.map[x][y])
+            print(row)
+
+    def Fall(self):
+        while True:
+            self.move(self.x() + 18, self.y())
+            pix = QPixmap('Images/Barrel.png')
+            pixx = pix.scaled(QSize(70, 50))
+            self.setPixmap(pixx)
+            self.map[self.BarrelX + 1][BarrelY] = self.map[self.BarrelX + 1][self.BarrelY] + 150
+            self.map[self.BarrelX][BarrelY] = self.map[self.BarrelX][self.BarrelY] - 150
+            self.map[self.BarrelX + 1][BarrelY + 1] = self.map[self.BarrelX + 1][self.BarrelY + 1] + 150
+            self.map[self.BarrelX][BarrelY + 1] = self.map[self.BarrelX][self.BarrelY + 1] - 150
+            #self.printMap()
+            time.sleep(0.5)
+
+
 class DonkeyKong(QLabel):
     def __init__(self, map, parent=None):
         super().__init__(parent)
