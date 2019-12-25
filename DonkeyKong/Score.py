@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QMainWindow, QPushButton, QHBoxLayout, QApplication, QLabel, QVBoxLayout, QGridLayout, QSizePolicy
 
 
-
 class Score(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -11,3 +10,4 @@ class Score(QLabel):
     def change_score(self, score):
        self.score = score
        self.setText(format(str(self.score)))
+

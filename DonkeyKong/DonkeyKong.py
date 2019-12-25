@@ -86,9 +86,11 @@ class DonkeyKong(QLabel):
         while True:
             i = random.randrange(0, 101, 1) % 2
             times = random.randrange(3, 5)
+            self.getPosition()
             if i == 0:
                 for j in range(0, times):
-                    if self.x() - 18 >= 0:
+                    if self.map[self.DonkeyX][self.DonkeyY - 1] != 1:
+                    #if self.x() - 18 >= 0: #Provera pomeranja po mapi
                         self.getPosition()
                         self.move(self.x() - 18, self.y())
                         pix = QPixmap('Images/doKo.png')
@@ -101,14 +103,16 @@ class DonkeyKong(QLabel):
                         time.sleep(0.5)
             else:
                 for j in range(0, times):
-                    if self.x() + 18 <= 510:
-                        self.getPosition()
-                        self.move(self.x() + 18, self.y())
-                        pix = QPixmap('Images/doKo.png')
-                        pixx = pix.scaled(QSize(70, 80))
-                        self.setPixmap(pixx)
-                        for k in range(0, 4):
-                            self.map[self.DonkeyX + k][self.DonkeyY + 4] = self.map[self.DonkeyX + k][self.DonkeyY + 4] + 6
-                            self.map[self.DonkeyX + k][self.DonkeyY] = self.map[self.DonkeyX + k][self.DonkeyY] - 6
-                        #self.printMap()
-                        time.sleep(0.5)
+                    if self.DonkeyY + 5 <= 32:
+                        if self.map[self.DonkeyX][self.DonkeyY + 5] != 1:
+                        #if self.x() + 18 <= 510:
+                            self.getPosition()
+                            self.move(self.x() + 18, self.y())
+                            pix = QPixmap('Images/doKo.png')
+                            pixx = pix.scaled(QSize(70, 80))
+                            self.setPixmap(pixx)
+                            for k in range(0, 4):
+                                self.map[self.DonkeyX + k][self.DonkeyY + 4] = self.map[self.DonkeyX + k][self.DonkeyY + 4] + 6
+                                self.map[self.DonkeyX + k][self.DonkeyY] = self.map[self.DonkeyX + k][self.DonkeyY] - 6
+                            #self.printMap()
+                            time.sleep(0.5)
