@@ -142,7 +142,7 @@ class MainWindow(QWidget):
         self.livesWidget2 = Lives(self.LivesWidget2)
         self.livesWidget1.setGeometry(9, 4, 100, 70)
         self.livesWidget2.setGeometry(440, 4, 100, 70)
-        self.donkey = DonkeyKong(self.map, self.DonkeyWidget)
+        self.donkey = DonkeyKong(self.map, self.hbox, self.DonkeyWidget)
         self.mover = Mover(self.map, self.livesWidget1, self.levelLabel, self.donkey, self.scoreLabel1, self.MarioWidget)
         self.princess = Princess(self.PrincessWidget)
 

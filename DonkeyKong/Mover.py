@@ -36,7 +36,8 @@ class Mover(QLabel):
     def check_lives(self, livesWidget, donkey):
         while True:
             self.getPosition()
-            if self.map[self.PlayerX][self.PlayerY] >= 9 or self.map[self.PlayerX - 1][self.PlayerY] >= 9:
+            #if self.map[self.PlayerX][self.PlayerY] >= 9 or self.map[self.PlayerX - 1][self.PlayerY] >= 9:
+            if self.map[self.PlayerX - 1][self.PlayerY] == 153 or self.map[self.PlayerX - 1][self.PlayerY] == 155 or self.map[self.PlayerX - 1][self.PlayerY] == 9 or self.map[self.PlayerX - 1][self.PlayerY] == 11:
                 self.setGeometry(-8, 621, 50, 70)
                 pix = QPixmap('Images/ItsAMeRight.png')
                 pixx = pix.scaled(QSize(50, 70))

@@ -18,10 +18,13 @@ class Barrel(QLabel):
         self.map = map
         self.BarrelX = donkeyX + 2
         self.BarrelY = donkeyY + 1
-        self.setGeometry((donkeyX + 1)*15,(donkeyY + 1)*15, 70, 50)
-        pix = QPixmap('Images/Barrel.png')
+        self.map[self.BarrelX][self.BarrelY] = self.map[self.BarrelX][self.BarrelY] + 150
+        self.map[self.BarrelX][self.BarrelY + 1] = self.map[self.BarrelX][self.BarrelY + 1] + 150
+        self.setGeometry(200, 100, 70, 50) # naci prave kordinate
+        pix = QPixmap('Images/doKo.png')
         pixx = pix.scaled(QSize(70, 50))
         self.setPixmap(pixx)
+        self.printMap()
         self.th = Thread(target=self.Fall, args=())
         self.th.start()
 
@@ -41,23 +44,27 @@ class Barrel(QLabel):
             print(row)
 
     def Fall(self):
-        while True:
+        self.getPosition()
+        for k in range(0, 27):
             self.move(self.x() + 18, self.y())
-            pix = QPixmap('Images/Barrel.png')
+            pix = QPixmap('Images/doKo.png')
             pixx = pix.scaled(QSize(70, 50))
             self.setPixmap(pixx)
-            self.map[self.BarrelX + 1][BarrelY] = self.map[self.BarrelX + 1][self.BarrelY] + 150
-            self.map[self.BarrelX][BarrelY] = self.map[self.BarrelX][self.BarrelY] - 150
-            self.map[self.BarrelX + 1][BarrelY + 1] = self.map[self.BarrelX + 1][self.BarrelY + 1] + 150
-            self.map[self.BarrelX][BarrelY + 1] = self.map[self.BarrelX][self.BarrelY + 1] - 150
-            #self.printMap()
+            if(self.BarrelX < 34):
+                self.map[self.BarrelX + 1][self.BarrelY] = self.map[self.BarrelX + 1][self.BarrelY] + 150
+                self.map[self.BarrelX + 1][self.BarrelY + 1] = self.map[self.BarrelX + 1][self.BarrelY + 1] + 150
+            self.map[self.BarrelX][self.BarrelY] = self.map[self.BarrelX][self.BarrelY] - 150
+            self.map[self.BarrelX][self.BarrelY + 1] = self.map[self.BarrelX][self.BarrelY + 1] - 150
+            self.printMap()
             time.sleep(0.5)
+            self.getPosition()
 
 
 class DonkeyKong(QLabel):
-    def __init__(self, map, parent=None):
+    def __init__(self, map, hbox, parent=None):
         super().__init__(parent)
         self.map = map
+        self.hbox = hbox
         self.DonkeyX = 0
         self.DonkeyY = 0
         self.setGeometry(262, 112, 70, 80)
@@ -70,7 +77,7 @@ class DonkeyKong(QLabel):
     def getPosition(self):
         for x in range(len(self.map)):
             for y in range(len(self.map[x])):
-                if self.map[x][y] == 6 or self.map[x][y] == 8 or self.map[x][y] >= 9:
+                if self.map[x][y] == 6 or self.map[x][y] == 8: #or #(self.map[x][y] >= 9 and self.map[x][y] <= 150):
                         self.DonkeyX = x
                         self.DonkeyY = y
                         return
@@ -83,6 +90,9 @@ class DonkeyKong(QLabel):
             print(row)
 
     def moveRandom(self):
+        first = True
+        barrelCount = 0
+        barrelRandom = random.randrange(3, 5)
         while True:
             i = random.randrange(0, 101, 1) % 2
             times = random.randrange(3, 5)
@@ -101,6 +111,8 @@ class DonkeyKong(QLabel):
                             self.map[self.DonkeyX + k][self.DonkeyY + 3] = self.map[self.DonkeyX + k][self.DonkeyY + 3] - 6
                         #self.printMap()
                         time.sleep(0.5)
+                barrelCount = barrelCount + 1
+
             else:
                 for j in range(0, times):
                     if self.DonkeyY + 5 <= 32:
@@ -116,3 +128,14 @@ class DonkeyKong(QLabel):
                                 self.map[self.DonkeyX + k][self.DonkeyY] = self.map[self.DonkeyX + k][self.DonkeyY] - 6
                             #self.printMap()
                             time.sleep(0.5)
+                barrelCount = barrelCount + 1
+
+            if barrelCount == barrelRandom and first:
+                barrelCount = 0
+                first = False
+                barrelRandom = random.randrange(3, 5)
+                self.getPosition()
+                self.Barrel = QWidget()
+                self.hbox.addWidget(self.Barrel, 1, 1)
+                self.barrel = Barrel(self.map, self.DonkeyX, self.DonkeyY)
+                time.sleep(2)
