@@ -119,9 +119,9 @@ class MainWindow(QWidget):
         self.MarioWidget = QWidget()
         self.DonkeyWidget = QWidget()
         self.LivesWidget1 = QWidget()
-        self.ScoreLabel1 = QLabel("Score:0", self)
+        self.ScoreLabel1 = QLabel("Score: 0", self)
         self.LivesWidget2 = QWidget()
-        self.ScoreLabel2 = QLabel("Score:0", self)
+        self.ScoreLabel2 = QLabel("Score: 0", self)
         self.LevelLabel = QLabel("Level ", self)
 
         self.hbox.addWidget(self.ScoreLabel1, 1, 1)
@@ -146,7 +146,7 @@ class MainWindow(QWidget):
         self.mover = Mover(self.map, self.livesWidget1, self.levelLabel, self.donkey, self.scoreLabel1, self.MarioWidget)
         self.princess = Princess(self.PrincessWidget)
 
-        self.mover.setFocus()
+        self.mover.setFocus() #naci novi nacin da dva mover-a budu u fokusu
 
     def printMap(self):
         while True:
