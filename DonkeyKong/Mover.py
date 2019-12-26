@@ -14,10 +14,14 @@ from threading import Thread
 
 
 class Mover(QLabel):
-    def __init__(self, map, livesWidget, levelLabel, donkeyKong, scoreLabel, parent=None):
+    def __init__(self, map, livesWidget, levelLabel, donkeyKong, scoreLabel, leftPlayer, parent=None):
         super().__init__(parent)
         self.setGeometry(-8, 621, 50, 70)
-        pix = QPixmap('Images/ItsAMeRight.png')
+        self.left = leftPlayer
+        if self.left:
+            pix = QPixmap('Images/ItsAMeRight.png')
+        else:
+            pix = QPixmap('Images/ItsAMeLeft.png')
         pixx = pix.scaled(QSize(50, 70))
         self.setPixmap(pixx)
         self.map = map
@@ -39,7 +43,10 @@ class Mover(QLabel):
             #if self.map[self.PlayerX][self.PlayerY] >= 9 or self.map[self.PlayerX - 1][self.PlayerY] >= 9:
             if 19 <= self.map[self.PlayerX - 1][self.PlayerY] <= 43:
                 self.setGeometry(-8, 621, 50, 70)
-                pix = QPixmap('Images/ItsAMeRight.png')
+                if self.left:
+                    pix = QPixmap('Images/ItsAMeRight.png')
+                else:
+                    pix = QPixmap('Images/ItsAMeLeft.png')
                 pixx = pix.scaled(QSize(50, 70))
                 self.setPixmap(pixx)
                 self.PlayerX = 0
@@ -102,7 +109,10 @@ class Mover(QLabel):
             #if self.map[self.PlayerX][self.PlayerY - 1] == 27 or self.map[self.PlayerX - 1][self.PlayerY+1] == 27 or self.map[self.PlayerX - 1][self.PlayerY -1] == 27 or self.map[self.PlayerX - 1][self.PlayerY-1] == 27:
             if self.map[self.PlayerX][self.PlayerY] == 27:
                 self.setGeometry(-8, 621, 50, 70)
-                pix = QPixmap('Images/ItsAMeRight.png')
+                if self.left:
+                    pix = QPixmap('Images/ItsAMeRight.png')
+                else:
+                    pix = QPixmap('Images/ItsAMeLeft.png')
                 pixx = pix.scaled(QSize(50, 70))
                 self.setPixmap(pixx)
                 self.PlayerX = 0
@@ -187,27 +197,40 @@ class Mover(QLabel):
                   self.scoreLabel.change_score(self.score)
 
     def keyPressEvent(self, event):
+        if self.left:
+            up = Qt.Key_Up
+            down = Qt.Key_Down
+            left = Qt.Key_Left
+            right = Qt.Key_Right
+            playerValue = 3
+        else:
+            up = Qt.Key_W
+            down = Qt.Key_S
+            left = Qt.Key_A
+            right = Qt.Key_D
+            playerValue = 4
+
         self.getPosition()
-        if event.key() == Qt.Key_Up:
+        if event.key() == up:
             if self.map[self.PlayerX][self.PlayerY] == 5 or self.map[self.PlayerX][self.PlayerY] == 9 or self.map[self.PlayerX][self.PlayerY] == 17:
                 self.move(self.x(), self.y() - 19)
                 self.previousX = self.PlayerX
-                self.map[self.PlayerX][self.PlayerY] = self.map[self.PlayerX][self.PlayerY] - 3
-                self.map[self.PlayerX - 2][self.PlayerY] = self.map[self.PlayerX - 2][self.PlayerY] + 3
+                self.map[self.PlayerX][self.PlayerY] = self.map[self.PlayerX][self.PlayerY] - playerValue
+                self.map[self.PlayerX - 2][self.PlayerY] = self.map[self.PlayerX - 2][self.PlayerY] + playerValue
                 self.getPosition()
                 self.newX = self.PlayerX
                 self.check_score(self.previousX, self.newX)
-        elif event.key() == Qt.Key_Down:
+        elif event.key() == down:
             #self.printMap()
             if self.map[self.PlayerX + 1][self.PlayerY] == 2 or self.map[self.PlayerX + 1][self.PlayerY] == 6 or self.map[self.PlayerX + 1][self.PlayerY] == 14:
             #if self.y() + 19 <= 630:
                #if self.map[self.PlayerX+1][self.PlayerY] == 5 or self.map[self.PlayerX + 1][self.PlayerY] == 2:
                 self.move(self.x(), self.y() + 19)
-                self.map[self.PlayerX + 1][self.PlayerY] = self.map[self.PlayerX + 1][self.PlayerY] + 3
-                self.map[self.PlayerX - 1][self.PlayerY] = self.map[self.PlayerX - 1][self.PlayerY] - 3
+                self.map[self.PlayerX + 1][self.PlayerY] = self.map[self.PlayerX + 1][self.PlayerY] + playerValue
+                self.map[self.PlayerX - 1][self.PlayerY] = self.map[self.PlayerX - 1][self.PlayerY] - playerValue
 
 
-        elif event.key() == Qt.Key_Left:
+        elif event.key() == left:
             if self.map[self.PlayerX][self.PlayerY - 1] != 1:
             #if self.x() - 18 >= -8:
                 if not ((self.map[self.PlayerX + 1][self.PlayerY] == 2 and self.map[self.PlayerX][self.PlayerY] == 5) or (self.map[self.PlayerX + 1][self.PlayerY] == 6 and self.map[self.PlayerX][self.PlayerY] == 5) or (self.map[self.PlayerX + 1][self.PlayerY] == 10 and self.map[self.PlayerX][self.PlayerY] == 5) or (self.map[self.PlayerX + 1][self.PlayerY] == 14 and self.map[self.PlayerX][self.PlayerY] == 5)):
@@ -215,13 +238,13 @@ class Mover(QLabel):
                     pix = QPixmap('Images/ItsAMeLeft.png')
                     pixx = pix.scaled(QSize(50, 70))
                     self.setPixmap(pixx)
-                    self.map[self.PlayerX][self.PlayerY] = self.map[self.PlayerX][self.PlayerY] - 3
-                    self.map[self.PlayerX-1][self.PlayerY] = self.map[self.PlayerX-1][self.PlayerY] - 3
-                    self.map[self.PlayerX][self.PlayerY-1] = self.map[self.PlayerX][self.PlayerY-1] + 3
-                    self.map[self.PlayerX-1][self.PlayerY-1] = self.map[self.PlayerX-1][self.PlayerY-1] + 3
+                    self.map[self.PlayerX][self.PlayerY] = self.map[self.PlayerX][self.PlayerY] - playerValue
+                    self.map[self.PlayerX-1][self.PlayerY] = self.map[self.PlayerX-1][self.PlayerY] - playerValue
+                    self.map[self.PlayerX][self.PlayerY-1] = self.map[self.PlayerX][self.PlayerY-1] + playerValue
+                    self.map[self.PlayerX-1][self.PlayerY-1] = self.map[self.PlayerX-1][self.PlayerY-1] + playerValue
 
                    # self.printMap()
-        elif event.key() == Qt.Key_Right:
+        elif event.key() == right:
             if self.map[self.PlayerX][self.PlayerY + 1] != 1:
             #if self.x() + 18 <= 532:
                 if not ((self.map[self.PlayerX + 1][self.PlayerY] == 2 and self.map[self.PlayerX][self.PlayerY] == 5) or (self.map[self.PlayerX + 1][self.PlayerY] == 6 and self.map[self.PlayerX][self.PlayerY] == 5) or (self.map[self.PlayerX + 1][self.PlayerY] == 10 and self.map[self.PlayerX][self.PlayerY] == 5) or (self.map[self.PlayerX + 1][self.PlayerY] == 14 and self.map[self.PlayerX][self.PlayerY] == 5)):
@@ -229,10 +252,10 @@ class Mover(QLabel):
                     pix = QPixmap('Images/ItsAMeRight.png')
                     pixx = pix.scaled(QSize(50, 70))
                     self.setPixmap(pixx)
-                    self.map[self.PlayerX][self.PlayerY] = self.map[self.PlayerX][self.PlayerY] - 3
-                    self.map[self.PlayerX-1][self.PlayerY] = self.map[self.PlayerX-1][self.PlayerY] - 3
-                    self.map[self.PlayerX][self.PlayerY+1] = self.map[self.PlayerX][self.PlayerY+1] + 3
-                    self.map[self.PlayerX-1][self.PlayerY+1] = self.map[self.PlayerX-1][self.PlayerY+1] + 3
+                    self.map[self.PlayerX][self.PlayerY] = self.map[self.PlayerX][self.PlayerY] - playerValue
+                    self.map[self.PlayerX-1][self.PlayerY] = self.map[self.PlayerX-1][self.PlayerY] - playerValue
+                    self.map[self.PlayerX][self.PlayerY+1] = self.map[self.PlayerX][self.PlayerY+1] + playerValue
+                    self.map[self.PlayerX-1][self.PlayerY+1] = self.map[self.PlayerX-1][self.PlayerY+1] + playerValue
 
                     #self.printMap()
         else:

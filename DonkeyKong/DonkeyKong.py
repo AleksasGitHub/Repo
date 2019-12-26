@@ -135,7 +135,7 @@ class DonkeyKong(QLabel):
                 first = False
                 barrelRandom = random.randrange(3, 5)
                 self.getPosition()
-                self.Barrel = QWidget()
-                self.hbox.addWidget(self.Barrel, 1, 1)
-                self.barrel = Barrel(self.map, self.DonkeyX, self.DonkeyY)
-                time.sleep(2)
+                #self.Barrel = QWidget()
+                #self.hbox.addWidget(self.Barrel, 1, 1)
+                #self.barrel = Barrel(self.map, self.DonkeyX, self.DonkeyY)
+                #time.sleep(2)
