@@ -246,7 +246,7 @@ class Mover(QLabel):
                 self.newX = self.PlayerX
                 self.check_score(self.previousX, self.newX)
         elif event.key() == self.down:
-            #self.printMap()
+            self.printMap()
             with self.my_obj_rwlock.r_locked():
                 b = self.map[self.PlayerX + 1][self.PlayerY] == 2 or self.map[self.PlayerX + 1][self.PlayerY] == 6 or self.map[self.PlayerX + 1][self.PlayerY] == 14
             if b:
