@@ -9,8 +9,9 @@ from Mover import Mover
 from DonkeyKong import DonkeyKong
 from Princess import Princess
 from Lives import Lives
-from  Score import  Score
+from Score import Score
 from Level import Level
+from PowerUp import PowerUp
 import sys
 import time
 from tkinter import *
@@ -25,6 +26,14 @@ class MainWindow(QWidget):
         self.setWindowIcon(QtGui.QIcon('Images/doKo.png'))
         self.setWindowTitle("Donkey Kong")
         self.initUI()
+
+    def printMap(self):
+        for x in range(len(self.map)):
+            row = []
+            for y in range(len(self.map[x])):
+                with self.my_obj_rwlock.r_locked():
+                    row.append(self.map[x][y])
+            print(row)
 
     def initUI(self):
         self.startButton = QPushButton("New Game", self)
@@ -125,6 +134,7 @@ class MainWindow(QWidget):
         self.LivesWidget2 = QWidget()
         self.ScoreLabel2 = QLabel("Score: 0", self)
         self.LevelLabel = QLabel("Level ", self)
+        self.PowerUpWidget = QWidget()
 
         self.hbox.addWidget(self.ScoreLabel1, 1, 1)
         self.hbox.addWidget(self.ScoreLabel2, 1, 1)
@@ -134,7 +144,13 @@ class MainWindow(QWidget):
         self.hbox.addWidget(self.DonkeyWidget, 1, 1)
         self.hbox.addWidget(self.LivesWidget1, 1, 1)
         self.hbox.addWidget(self.LivesWidget2, 1, 1)
+        self.hbox.addWidget(self.PowerUpWidget, 1, 1)
 
+        self.x = random.randrange(0, 4)
+        self.y = random.randrange(0, 31)
+        self.map[self.x * 5 + 14][self.y + 1] = self.map[self.x * 5 + 14][self.y + 1] + 8
+
+        self.powerUp = PowerUp(self.x, self.y, self.PowerUpWidget)
         self.scoreLabel1 = Score(self.ScoreLabel1)
         self.scoreLabel2 = Score(self.ScoreLabel2)
         self.scoreLabel1.setGeometry(19, 48, 100, 38)
@@ -145,7 +161,7 @@ class MainWindow(QWidget):
         self.livesWidget1.setGeometry(9, 4, 100, 70)
         self.livesWidget2.setGeometry(440, 4, 100, 70)
         self.donkey = DonkeyKong(self.map, self.hbox, self.my_obj_rwlock, self.DonkeyWidget)
-        self.mover = Mover(self.map, self.livesWidget1, self.levelLabel, self.donkey, self.scoreLabel1, self.my_obj_rwlock, False, self.MarioWidget)
+        self.mover = Mover(self.map, self.livesWidget1, self.levelLabel, self.donkey, self.scoreLabel1, self.my_obj_rwlock, True, self.MarioWidget)
         self.princess = Princess(self.PrincessWidget)
 
         self.mover.setFocus() #naci novi nacin da dva mover-a budu u fokusu
