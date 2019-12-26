@@ -20,19 +20,13 @@ class Mover(QLabel):
         if self.left:
             pix = QPixmap('Images/ItsAMeRight.png')
             self.playerValue = 3
+            self.otherPlayerValue = 4
             self.setGeometry(-8, 621, 50, 70)
-            self.up = Qt.Key_Up
-            self.down = Qt.Key_Down
-            self.left = Qt.Key_Left
-            self.right = Qt.Key_Right
         else:
             pix = QPixmap('Images/ItsAMeLeft.png')
             self.playerValue = 4
+            self.otherPlayerValue = 3
             self.setGeometry(533, 621, 50, 70)
-            self.up = Qt.Key_W
-            self.down = Qt.Key_S
-            self.left = Qt.Key_A
-            self.right = Qt.Key_D
 
         pixx = pix.scaled(QSize(50, 70))
         self.setPixmap(pixx)
@@ -55,13 +49,14 @@ class Mover(QLabel):
             self.getPosition()
             #if self.map[self.PlayerX][self.PlayerY] >= 9 or self.map[self.PlayerX - 1][self.PlayerY] >= 9:
             with self.my_obj_rwlock.r_locked():
-                b = 19 <= self.map[self.PlayerX - 1][self.PlayerY] <= 43 and self.map[self.PlayerX - 1][self.PlayerY] != 27
+                b = self.playerValue + 16 <= self.map[self.PlayerX - 1][self.PlayerY] <= 39 + self.playerValue and self.map[self.PlayerX - 1][self.PlayerY] != 24 + self.playerValue
             if b:
-                self.setGeometry(-8, 621, 50, 70)
                 if self.left:
                     pix = QPixmap('Images/ItsAMeRight.png')
+                    self.setGeometry(-8, 621, 50, 70)
                 else:
                     pix = QPixmap('Images/ItsAMeLeft.png')
+                    self.setGeometry(533, 621, 50, 70)
                 pixx = pix.scaled(QSize(50, 70))
                 self.setPixmap(pixx)
                 self.PlayerX = 0
@@ -124,13 +119,14 @@ class Mover(QLabel):
             self.getPosition()
             #if self.map[self.PlayerX][self.PlayerY - 1] == 27 or self.map[self.PlayerX - 1][self.PlayerY+1] == 27 or self.map[self.PlayerX - 1][self.PlayerY -1] == 27 or self.map[self.PlayerX - 1][self.PlayerY-1] == 27:
             with self.my_obj_rwlock.r_locked():
-                b = self.map[self.PlayerX][self.PlayerY] == 27
+                b = self.map[self.PlayerX][self.PlayerY] == 24 + self.playerValue
             if b:
-                self.setGeometry(-8, 621, 50, 70)
                 if self.left:
                     pix = QPixmap('Images/ItsAMeRight.png')
+                    self.setGeometry(-8, 621, 50, 70)
                 else:
                     pix = QPixmap('Images/ItsAMeLeft.png')
+                    self.setGeometry(533, 621, 50, 70)
                 pixx = pix.scaled(QSize(50, 70))
                 self.setPixmap(pixx)
                 self.PlayerX = 0
@@ -189,24 +185,11 @@ class Mover(QLabel):
             time.sleep(0.5)
 
     def getPosition(self):
-        if self.left:
             self.playerDrawn = 0
             for x in range(len(self.map)):
                 for y in range(len(self.map[x])):
                     with self.my_obj_rwlock.r_locked():
-                        if self.map[x][y] == 3 or self.map[x][y] == 5 or self.map[x][y] == 7 or self.map[x][y] == 9 or self.map[x][y] == 19 or self.map[x][y] == 23 or self.map[x][y] == 11 or self.map[x][y] == 34 or self.map[x][y] == 27:
-                            if self.playerDrawn == 0:
-                                self.playerDrawn = 1
-                            else:
-                                self.PlayerX = x
-                                self.PlayerY = y
-                                return
-        else:
-            self.playerDrawn = 0
-            for x in range(len(self.map)):
-                for y in range(len(self.map[x])):
-                    with self.my_obj_rwlock.r_locked():
-                        if self.map[x][y] == 4 or self.map[x][y] == 6 or self.map[x][y] == 7 or self.map[x][y] == 9 or self.map[x][y] == 20 or self.map[x][y] == 23 or self.map[x][y] == 12 or self.map[x][y] == 35 or self.map[x][y] == 28:
+                        if self.map[x][y] == self.playerValue or self.map[x][y] == self.playerValue + 2 or self.map[x][y] == self.playerValue + self.otherPlayerValue or self.map[x][y] == self.playerValue + self.otherPlayerValue + 2 or self.map[x][y] == 16 + self.playerValue or self.map[x][y] == self.playerValue + self.otherPlayerValue + 16 or self.map[x][y] == 8 + self.playerValue or self.map[x][y] == 31 + self.playerValue or self.map[x][y] == 24 + self.playerValue:
                             if self.playerDrawn == 0:
                                 self.playerDrawn = 1
                             else:
@@ -232,10 +215,21 @@ class Mover(QLabel):
 
     def keyPressEvent(self, event):
 
+        if self.left:
+            up = Qt.Key_Up
+            down = Qt.Key_Down
+            left = Qt.Key_Left
+            right = Qt.Key_Right
+        else:
+            up = Qt.Key_W
+            down = Qt.Key_S
+            left = Qt.Key_A
+            right = Qt.Key_D
+
         self.getPosition()
-        if event.key() == self.up:
+        if event.key() == up:
             with self.my_obj_rwlock.r_locked():
-                b = self.map[self.PlayerX][self.PlayerY] == 5 or self.map[self.PlayerX][self.PlayerY] == 9 or self.map[self.PlayerX][self.PlayerY] == 17
+                b = self.map[self.PlayerX][self.PlayerY] == 2 + self.playerValue or self.map[self.PlayerX][self.PlayerY] == 2 + self.playerValue + self.otherPlayerValue or self.map[self.PlayerX][self.PlayerY] == 10 + self.playerValue + self.otherPlayerValue
             if b:
                 self.move(self.x(), self.y() - 19)
                 self.previousX = self.PlayerX
@@ -245,10 +239,10 @@ class Mover(QLabel):
                 self.getPosition()
                 self.newX = self.PlayerX
                 self.check_score(self.previousX, self.newX)
-        elif event.key() == self.down:
-            self.printMap()
+        elif event.key() == down:
+            #self.printMap()
             with self.my_obj_rwlock.r_locked():
-                b = self.map[self.PlayerX + 1][self.PlayerY] == 2 or self.map[self.PlayerX + 1][self.PlayerY] == 6 or self.map[self.PlayerX + 1][self.PlayerY] == 14
+                b = self.map[self.PlayerX + 1][self.PlayerY] == 2 or self.map[self.PlayerX + 1][self.PlayerY] == 2 + self.otherPlayerValue or self.map[self.PlayerX + 1][self.PlayerY] == 10 + self.otherPlayerValue
             if b:
             #if self.y() + 19 <= 630:
                #if self.map[self.PlayerX+1][self.PlayerY] == 5 or self.map[self.PlayerX + 1][self.PlayerY] == 2:
@@ -258,12 +252,12 @@ class Mover(QLabel):
                     self.map[self.PlayerX - 1][self.PlayerY] = self.map[self.PlayerX - 1][self.PlayerY] - self.playerValue
 
 
-        elif event.key() == self.left:
+        elif event.key() == left:
             with self.my_obj_rwlock.r_locked():
                 b1 = self.map[self.PlayerX][self.PlayerY - 1] != 1
             if b1:
                 with self.my_obj_rwlock.r_locked():
-                    b2 = ((self.map[self.PlayerX + 1][self.PlayerY] == 2 and self.map[self.PlayerX][self.PlayerY] == 5) or (self.map[self.PlayerX + 1][self.PlayerY] == 6 and self.map[self.PlayerX][self.PlayerY] == 5) or (self.map[self.PlayerX + 1][self.PlayerY] == 10 and self.map[self.PlayerX][self.PlayerY] == 5) or (self.map[self.PlayerX + 1][self.PlayerY] == 14 and self.map[self.PlayerX][self.PlayerY] == 5))
+                    b2 = ((self.map[self.PlayerX + 1][self.PlayerY] == 2 and self.map[self.PlayerX][self.PlayerY] == 2 + self.playerValue) or (self.map[self.PlayerX + 1][self.PlayerY] == 2 + self.otherPlayerValue and self.map[self.PlayerX][self.PlayerY] == 2 + self.playerValue) or (self.map[self.PlayerX + 1][self.PlayerY] == 10 and self.map[self.PlayerX][self.PlayerY] == 2 + self.playerValue) or (self.map[self.PlayerX + 1][self.PlayerY] == 10 + self.otherPlayerValue and self.map[self.PlayerX][self.PlayerY] == 2 + self.playerValue))
                 if not b2:
                     self.move(self.x() - 18, self.y())
                     pix = QPixmap('Images/ItsAMeLeft.png')
@@ -276,13 +270,13 @@ class Mover(QLabel):
                         self.map[self.PlayerX-1][self.PlayerY-1] = self.map[self.PlayerX-1][self.PlayerY-1] + self.playerValue
 
                    # self.printMap()
-        elif event.key() == self.right:
+        elif event.key() == right:
             with self.my_obj_rwlock.r_locked():
                 b1 = self.map[self.PlayerX][self.PlayerY + 1] != 1
             if b1:
             #if self.x() + 18 <= 532:
                 with self.my_obj_rwlock.r_locked():
-                    b2 = ((self.map[self.PlayerX + 1][self.PlayerY] == 2 and self.map[self.PlayerX][self.PlayerY] == 5) or (self.map[self.PlayerX + 1][self.PlayerY] == 6 and self.map[self.PlayerX][self.PlayerY] == 5) or (self.map[self.PlayerX + 1][self.PlayerY] == 10 and self.map[self.PlayerX][self.PlayerY] == 5) or (self.map[self.PlayerX + 1][self.PlayerY] == 14 and self.map[self.PlayerX][self.PlayerY] == 5))
+                    b2 = ((self.map[self.PlayerX + 1][self.PlayerY] == 2 and self.map[self.PlayerX][self.PlayerY] == 2 + self.playerValue) or (self.map[self.PlayerX + 1][self.PlayerY] == 2 + self.otherPlayerValue and self.map[self.PlayerX][self.PlayerY] == 2 + self.playerValue) or (self.map[self.PlayerX + 1][self.PlayerY] == 10 and self.map[self.PlayerX][self.PlayerY] == 2 + self.playerValue) or (self.map[self.PlayerX + 1][self.PlayerY] == 10 + self.otherPlayerValue and self.map[self.PlayerX][self.PlayerY] == 2 + self.playerValue))
                 if not b2:
                     self.move(self.x() + 18, self.y())
                     pix = QPixmap('Images/ItsAMeRight.png')
@@ -297,4 +291,3 @@ class Mover(QLabel):
                     #self.printMap()
         else:
             QLabel.keyPressEvent(self, event)
-
