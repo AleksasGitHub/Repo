@@ -108,11 +108,11 @@ class DonkeyKong(QLabel):
             self.getPosition()
             if i == 0:
                 for j in range(0, times):
+                    self.getPosition()
                     with self.my_obj_rwlock.r_locked():
                         b = self.map[self.DonkeyX][self.DonkeyY - 1] != 1
                     if b:
                     #if self.x() - 18 >= 0: #Provera pomeranja po mapi
-                        self.getPosition()
                         self.move(self.x() - 18, self.y())
                         pix = QPixmap('Images/doKo.png')
                         pixx = pix.scaled(QSize(70, 80))
@@ -127,12 +127,12 @@ class DonkeyKong(QLabel):
 
             else:
                 for j in range(0, times):
+                    self.getPosition()
                     if self.DonkeyY + 5 <= 32:
                         with self.my_obj_rwlock.r_locked():
-                            b = self.map[self.DonkeyX][self.DonkeyY + 5] != 1
+                            b = self.map[self.DonkeyX][self.DonkeyY + 4] != 1
                         if b:
                         #if self.x() + 18 <= 510:
-                            self.getPosition()
                             self.move(self.x() + 18, self.y())
                             pix = QPixmap('Images/doKo.png')
                             pixx = pix.scaled(QSize(70, 80))
