@@ -37,7 +37,7 @@ class Mover(QLabel):
         while True:
             self.getPosition()
             #if self.map[self.PlayerX][self.PlayerY] >= 9 or self.map[self.PlayerX - 1][self.PlayerY] >= 9:
-            if 19 <= self.map[self.PlayerX - 1][self.PlayerY] <= 43:
+            if 19 <= self.map[self.PlayerX - 1][self.PlayerY] <= 43 and self.map[self.PlayerX - 1][self.PlayerY] != 27:
                 self.setGeometry(-8, 621, 50, 70)
                 pix = QPixmap('Images/ItsAMeRight.png')
                 pixx = pix.scaled(QSize(50, 70))
@@ -163,7 +163,7 @@ class Mover(QLabel):
         self.playerDrawn = 0
         for x in range(len(self.map)):
             for y in range(len(self.map[x])):
-                if self.map[x][y] == 3 or self.map[x][y] == 5 or self.map[x][y] == 7 or self.map[x][y] == 9 or self.map[x][y] == 19 or self.map[x][y] == 23 or self.map[x][y] == 11 or self.map[x][y] == 34:
+                if self.map[x][y] == 3 or self.map[x][y] == 5 or self.map[x][y] == 7 or self.map[x][y] == 9 or self.map[x][y] == 19 or self.map[x][y] == 23 or self.map[x][y] == 11 or self.map[x][y] == 34 or self.map[x][y] == 27:
                     if self.playerDrawn == 0:
                         self.playerDrawn = 1
                     else:

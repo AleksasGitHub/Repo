@@ -99,9 +99,9 @@ class DonkeyKong(QLabel):
             self.getPosition()
             if i == 0:
                 for j in range(0, times):
+                    self.getPosition()
                     if self.map[self.DonkeyX][self.DonkeyY - 1] != 1:
                     #if self.x() - 18 >= 0: #Provera pomeranja po mapi
-                        self.getPosition()
                         self.move(self.x() - 18, self.y())
                         pix = QPixmap('Images/doKo.png')
                         pixx = pix.scaled(QSize(70, 80))
@@ -109,16 +109,16 @@ class DonkeyKong(QLabel):
                         for k in range(0, 4):
                             self.map[self.DonkeyX + k][self.DonkeyY - 1] = self.map[self.DonkeyX + k][self.DonkeyY - 1] + 16
                             self.map[self.DonkeyX + k][self.DonkeyY + 3] = self.map[self.DonkeyX + k][self.DonkeyY + 3] - 16
-                        #self.printMap()
+                        self.printMap()
                         time.sleep(0.5)
                 barrelCount = barrelCount + 1
 
             else:
                 for j in range(0, times):
+                    self.getPosition()
                     if self.DonkeyY + 5 <= 32:
-                        if self.map[self.DonkeyX][self.DonkeyY + 5] != 1:
+                        if self.map[self.DonkeyX][self.DonkeyY + 4] != 1:
                         #if self.x() + 18 <= 510:
-                            self.getPosition()
                             self.move(self.x() + 18, self.y())
                             pix = QPixmap('Images/doKo.png')
                             pixx = pix.scaled(QSize(70, 80))
@@ -135,7 +135,7 @@ class DonkeyKong(QLabel):
                 first = False
                 barrelRandom = random.randrange(3, 5)
                 self.getPosition()
-                self.Barrel = QWidget()
-                self.hbox.addWidget(self.Barrel, 1, 1)
-                self.barrel = Barrel(self.map, self.DonkeyX, self.DonkeyY)
-                time.sleep(2)
+                #self.Barrel = QWidget()
+                #self.hbox.addWidget(self.Barrel, 1, 1)
+                #self.barrel = Barrel(self.map, self.DonkeyX, self.DonkeyY)
+                #time.sleep(2)
