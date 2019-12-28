@@ -16,6 +16,7 @@ class Princess(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setGeometry(260, 20, 50, 70)
+        self.kill = False
         pix = QPixmap('Images/peach2.png')
         pixx = pix.scaled(QSize(50, 70))
         self.setPixmap(pixx)
@@ -23,7 +24,7 @@ class Princess(QLabel):
         self.th.start()
 
     def wave(self):
-        while True:
+        while not self.kill:
             pix = QPixmap('Images/wave.png')
             pixx = pix.scaled(QSize(50, 70))
             self.setPixmap(pixx)

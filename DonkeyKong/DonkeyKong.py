@@ -19,6 +19,7 @@ class Barrel(QLabel):
         self.BarrelX = donkeyX + 2
         self.BarrelY = donkeyY + 1
         self.my_obj_rwlock = my_obj_rwlock
+
         with self.my_obj_rwlock.w_locked():
             self.map[self.BarrelX][self.BarrelY] = self.map[self.BarrelX][self.BarrelY] + 31
             self.map[self.BarrelX][self.BarrelY + 1] = self.map[self.BarrelX][self.BarrelY + 1] + 31
@@ -73,6 +74,7 @@ class DonkeyKong(QLabel):
         self.hbox = hbox
         self.DonkeyX = 0
         self.DonkeyY = 0
+        self.kill = False
         self.setGeometry(262, 112, 70, 80)
         pix = QPixmap('Images/doKo.png')
         pixx = pix.scaled(QSize(70, 80))
@@ -103,7 +105,7 @@ class DonkeyKong(QLabel):
         first = True
         barrelCount = 0
         barrelRandom = random.randrange(3, 5)
-        while True:
+        while not self.kill:
             i = random.randrange(0, 101, 1) % 2
             times = random.randrange(3, 5)
             self.getPosition()
@@ -151,7 +153,7 @@ class DonkeyKong(QLabel):
                 first = False
                 barrelRandom = random.randrange(3, 5)
                 self.getPosition()
-                self.BarrelWidget = QWidget()
-                self.hbox.addWidget(self.BarrelWidget, 1, 1)
-                self.barrel = Barrel(self.map, self.DonkeyX, self.DonkeyY, self.my_obj_rwlock, self.BarrelWidget)
+                #self.BarrelWidget = QWidget()
+                #self.hbox.addWidget(self.BarrelWidget, 1, 1)
+                #self.barrel = Barrel(self.map, self.DonkeyX, self.DonkeyY, self.my_obj_rwlock, self.BarrelWidget)
                 time.sleep(2)

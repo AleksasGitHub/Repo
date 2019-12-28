@@ -18,6 +18,7 @@ class PowerUp(QLabel):
         self.row = 263 + x * 97
         self.column = 9 + y * 18
         self.setGeometry(self.column, self.row, 20, 20)  # 263 + x*97 - redovi; 9 + y*18 - kolone
+        self.kill = False
         pix = QPixmap('Images/PowerUp.png')
         pixx = pix.scaled(QSize(20, 20))
         self.setPixmap(pixx)
@@ -25,7 +26,7 @@ class PowerUp(QLabel):
         self.th.start()
 
     def jump(self):
-        while True:
+        while not self.kill:
             self.setGeometry(self.column, self.row - 5, 20, 20)
             time.sleep(0.5)
             self.setGeometry(self.column, self.row, 20, 20)
