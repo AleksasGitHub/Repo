@@ -22,11 +22,13 @@ class Mover(QLabel):
             self.playerValue = 3
             self.otherPlayerValue = 4
             self.setGeometry(-8, 621, 50, 70)
+            self.lives=3
         else:
             pix = QPixmap('Images/ItsAMeLeft.png')
             self.playerValue = 4
             self.otherPlayerValue = 3
             self.setGeometry(533, 621, 50, 70)
+            self.lives=0
 
         pixx = pix.scaled(QSize(50, 70))
         self.setPixmap(pixx)
@@ -34,7 +36,7 @@ class Mover(QLabel):
         self.map = map
         self.PlayerX = 0
         self.PlayerY = 0
-        self.lives = 3
+        #self.lives = 3
         self.platformsList = []
         self.donkey = donkeyKong
         self.scoreLabel = scoreLabel

@@ -1,5 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QMainWindow, QPushButton, QHBoxLayout, QApplication, QLabel, QVBoxLayout, QGridLayout, QSizePolicy
 
+from PyQt5.QtGui import QImage, QPalette, QBrush, QPixmap
+from PyQt5.QtCore import QSize, Qt
 
 class Score(QLabel):
     def __init__(self, parent=None):
@@ -11,3 +13,12 @@ class Score(QLabel):
        self.score = score
        self.setText(format(str(self.score)))
 
+    def text(self, player):
+        if player==1:
+          pix = QPixmap('Images/pl1.png')
+          pixx = pix.scaled(QSize(100, 18))
+          self.setPixmap(pixx)
+        else:
+            pix = QPixmap('Images/pl2.png')
+            pixx = pix.scaled(QSize(100, 18))
+            self.setPixmap(pixx)

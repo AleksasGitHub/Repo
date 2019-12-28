@@ -29,4 +29,5 @@ class Lives(QLabel):
             pix = QPixmap('Images/1heart.png')
             pixx = pix.scaled(QSize(100, 70))
             self.setPixmap(pixx)
-
+        elif self.lives == 0:
+            self.hide()

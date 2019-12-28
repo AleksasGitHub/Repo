@@ -25,7 +25,7 @@ class MainWindow(QWidget):
         super().__init__()
         self.setWindowIcon(QtGui.QIcon('Images/doKo.png'))
         self.setWindowTitle("Donkey Kong")
-        self.initUI()
+        self.initUI(True)
 
     def printMap(self):
         for x in range(len(self.map)):
@@ -35,7 +35,14 @@ class MainWindow(QWidget):
                     row.append(self.map[x][y])
             print(row)
 
-    def initUI(self):
+    def initUI(self,firstTime):
+        if (not firstTime):
+            self.ScoreLabelText.hide()
+            self.ScoreLabelText2.hide()
+            self.menuButton.hide()
+            self.scoreLabelMover1.hide()
+            self.scoreLabelMover2.hide()
+            self.scoreLabelResult.hide()
         self.startButton = QPushButton("New Game", self)
         self.startButton.resize(100, 32)
         self.startButton.setGeometry(130, 600, 100, 32)
@@ -102,11 +109,13 @@ class MainWindow(QWidget):
         self.setPalette(palette)
 
         self.hbox = QGridLayout()
-        self.hbox.setHorizontalSpacing(0)
-        self.hbox.setVerticalSpacing(0)
-        self.hbox.setColumnStretch(1, 4)
-        self.hbox.setRowStretch(1, 4)
+        # self.hbox.setHorizontalSpacing(0)
+        # self.hbox.setVerticalSpacing(0)
+        self.hbox.setColumnStretch(1, 6)
+        self.hbox.setRowStretch(1, 6)
 
+        self.startButton.show()
+        self.exitButton.show()
         self.setLayout(self.hbox)
 
         self.setGeometry(400, 35, 600, 700)
@@ -165,6 +174,13 @@ class MainWindow(QWidget):
         self.mover2 = Mover(self.map, self.livesWidget2, self.levelLabel, self.donkey, self.scoreLabel2, self.my_obj_rwlock, False, self.powerUp, self.MarioWidget)
         self.princess = Princess(self.PrincessWidget)
 
+        self.th = Thread(target=self.check_for_game_end)
+        self.th.do_run = True
+        self.th.start()
+
+        self.mover1.setFocus()
+        self.hbox.update()
+
     def printMap(self):
         while True:
             for x in range(len(self.map)):
@@ -174,6 +190,93 @@ class MainWindow(QWidget):
                 print(row)
             time.sleep(5)
 
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_R:
+         for i in reversed(range(self.hbox.count())):
+           widgetToRemove = self.hbox.itemAt(i).widget()
+           self.hbox.removeWidget(widgetToRemove)
+           widgetToRemove.setParent(None)
+
+         self.princess.kill = True
+         self.donkey.kill = True
+         self.powerUp.kill = True
+         self.resultInfo()
+
+    def check_for_game_end(self):
+        t = threading.currentThread()
+        while getattr(t, "do_run", True):
+           if(self.mover1.lives==0 and self.mover2.lives==0):
+               print("over")
+               t.do_run = False
+               #for i in reversed(range(self.hbox.count())):
+                #  self.hbox.itemAt(i).widget().setParent(None)
+               for i in reversed(range(self.hbox.count())):
+                   widgetToRemove = self.hbox.itemAt(i).widget()
+                   self.hbox.removeWidget(widgetToRemove)
+                   widgetToRemove.setParent(None)
+               self.princess.kill = True
+               self.donkey.kill = True
+               self.powerUp.kill = True
+               self.resultInfo()
+               #self.hbox.update()
+
+           time.sleep(0.5)
+
+    def resultInfo(self):
+        oImage = QImage("Images/black.jpg")
+        sImage = oImage.scaled(QSize(600, 700))
+        palette = QPalette()
+        palette.setBrush(QPalette.Window, QBrush(sImage))
+        print("proba")
+
+        self.setPalette(palette)
+        self.menuButton = QPushButton("Menu", self)
+        #self.hbox.addWidget(self.menuButton)
+        self.menuButton.show()
+        self.menuButton.resize(100, 32)
+        self.menuButton.setGeometry(230, 500, 100, 32)
+        self.menuButton.setStyleSheet("background-color: green; color: white; font-size:14px; font: bold System")
+        self.menuButton.clicked.connect(lambda : self.initUI(False))
+
+
+        self.ScoreLabelText = QLabel("Score: 0", self)
+        self.hbox.addWidget(self.ScoreLabelText, 1, 1)
+        self.scoreLabelText = Score(self.ScoreLabelText)
+        self.scoreLabelText.setGeometry(70, 278, 100, 18)
+        self.scoreLabelText.text(1)
+        self.ScoreLabelText2 = QLabel("Score: 0", self)
+        self.hbox.addWidget(self.ScoreLabelText2, 1, 1)
+        self.scoreLabelText2 = Score(self.ScoreLabelText2)
+        self.scoreLabelText2.setGeometry(370, 278, 100, 18)
+        self.scoreLabelText2.text(2)
+
+        self.ScoreLabelMover1 = QLabel("Score: 0", self)
+        self.hbox.addWidget(self.ScoreLabelMover1, 1, 1)
+        self.scoreLabelMover1 = Score(self.ScoreLabelMover1)
+        self.scoreLabelMover1.setGeometry(120, 348, 100, 38)
+        self.scoreLabelMover1.setText(format(str(self.mover1.score)))
+
+        self.ScoreLabelMover2 = QLabel("Score: 0", self)
+        self.hbox.addWidget(self.ScoreLabelMover2, 1, 1)
+        self.scoreLabelMover2 = Score(self.ScoreLabelMover2)
+        self.scoreLabelMover2.setGeometry(420, 348, 100, 38)
+        self.scoreLabelMover2.setText(format(str(self.mover2.score)))
+
+        self.ScoreLabelResult = QLabel("Score: 0", self)
+        self.hbox.addWidget(self.ScoreLabelResult, 1, 1)
+        self.scoreLabelResult = Score(self.ScoreLabelResult)
+        self.scoreLabelResult.setGeometry(210, 148, 300, 38)
+        self.scoreLabelResult.setStyleSheet("background-color: black; color: red; font-size:18px; font: bold System")
+        if(self.mover1.score>self.mover2.score):
+            self.scoreLabelResult.setText("PLAYER 1 WON")
+        elif(self.mover1.score<self.mover2.score):
+            self.scoreLabelResult.setText("PLAYER 2 WON")
+        else:
+            self.scoreLabelResult.setText("NO WINNER")
+
+        self.hbox.update()
+        self.setGeometry(400, 35, 600, 700)
+        self.show()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
