@@ -161,8 +161,8 @@ class MainWindow(QWidget):
         self.livesWidget1.setGeometry(9, 4, 100, 70)
         self.livesWidget2.setGeometry(440, 4, 100, 70)
         self.donkey = DonkeyKong(self.map, self.hbox, self.my_obj_rwlock, self.DonkeyWidget)
-        self.mover1 = Mover(self.map, self.livesWidget1, self.levelLabel, self.donkey, self.scoreLabel1, self.my_obj_rwlock, True, self.MarioWidget)
-        self.mover2 = Mover(self.map, self.livesWidget2, self.levelLabel, self.donkey, self.scoreLabel2, self.my_obj_rwlock, False, self.MarioWidget)
+        self.mover1 = Mover(self.map, self.livesWidget1, self.levelLabel, self.donkey, self.scoreLabel1, self.my_obj_rwlock, True, self.powerUp, self.MarioWidget)
+        self.mover2 = Mover(self.map, self.livesWidget2, self.levelLabel, self.donkey, self.scoreLabel2, self.my_obj_rwlock, False, self.powerUp, self.MarioWidget)
         self.princess = Princess(self.PrincessWidget)
 
     def printMap(self):

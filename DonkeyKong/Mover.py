@@ -14,7 +14,7 @@ from threading import Thread
 
 
 class Mover(QLabel):
-    def __init__(self, map, livesWidget, levelLabel, donkeyKong, scoreLabel, my_obj_rwlock, leftPlayer, parent=None):
+    def __init__(self, map, livesWidget, levelLabel, donkeyKong, scoreLabel, my_obj_rwlock, leftPlayer, powerUp, parent=None):
         super().__init__(parent)
         self.left = leftPlayer
         if self.left:
@@ -30,6 +30,7 @@ class Mover(QLabel):
 
         pixx = pix.scaled(QSize(50, 70))
         self.setPixmap(pixx)
+        self.powerUp = powerUp
         self.map = map
         self.PlayerX = 0
         self.PlayerY = 0
@@ -41,8 +42,10 @@ class Mover(QLabel):
         self.my_obj_rwlock = my_obj_rwlock
         self.th = Thread(target=self.check_lives, args=(livesWidget, self.donkey,))
         self.th1 = Thread(target=self.check_level, args=(levelLabel, livesWidget, self.donkey,))
+        self.th2 = Thread(target=self.checkPowerUp, args=(livesWidget,))
         self.th.start()
         self.th1.start()
+        self.th2.start()
 
     def check_lives(self, livesWidget, donkey):
         while True:
@@ -183,6 +186,23 @@ class Mover(QLabel):
                 self.scoreLabel.change_score(self.score)
                 self.platformsList = []
             time.sleep(0.5)
+
+    def checkPowerUp(self, livesWidget):
+        while True:
+            self.getPosition()
+            if self.map[self.PlayerX][self.PlayerY] == 8 + self.playerValue or self.map[self.PlayerX][self.PlayerY] == 10 + self.playerValue or self.map[self.PlayerX][self.PlayerY] == 8 + self.playerValue + self.otherPlayerValue or self.map[self.PlayerX][self.PlayerY] == 10 + self.playerValue + self.otherPlayerValue:
+                i = random.randrange(0, 101, 1) % 2
+                if i == 0:
+                    if self.lives - 1 > 0:
+                        self.lives = self.lives - 1
+                        livesWidget.lose_life(self.lives)
+                    # else game over
+                else:
+                    if self.lives + 1 <= 3:
+                        self.lives = self.lives + 1
+                        livesWidget.lose_life(self.lives)
+                self.powerUp.hide()
+                self.map[self.PlayerX][self.PlayerY] = self.map[self.PlayerX][self.PlayerY] - 8
 
     def getPosition(self):
             self.playerDrawn = 0
