@@ -15,9 +15,11 @@ from multiprocessing import Process, Pipe
 
 
 class Mover(QLabel):
-    def __init__(self, pipe: Pipe, livesWidget, levelLabel, donkeyKong, scoreLabel, my_obj_rwlock, leftPlayer, powerUp, powerUpWidget, parent=None):
+    def __init__(self, pipe: Pipe, self_pipe: Pipe, power_up_pipe: Pipe, livesWidget, levelLabel, donkeyKong, scoreLabel, my_obj_rwlock, leftPlayer, powerUp, powerUpWidget, parent=None):
         super().__init__(parent)
         self.left = leftPlayer
+        self.self_pipe = self_pipe
+        self.power_up_pipe = power_up_pipe
         if self.left:
             pix = QPixmap('Images/ItsAMeRight.png')
             self.playerValue = 3
@@ -28,7 +30,6 @@ class Mover(QLabel):
             self.playerValue = 4
             self.otherPlayerValue = 3
             self.setGeometry(533, 621, 50, 70)
-
         pixx = pix.scaled(QSize(50, 70))
         self.setPixmap(pixx)
         self.powerUpWidget = powerUpWidget
@@ -47,9 +48,24 @@ class Mover(QLabel):
         self.th = Thread(target=self.check_lives, args=(livesWidget, self.donkey,))
         self.th1 = Thread(target=self.check_level, args=(levelLabel, livesWidget, self.donkey,))
         self.th2 = Thread(target=self.checkPowerUp, args=(livesWidget,))
+        self.restart_thread = Thread(target=self.restart, args=(livesWidget,))
         self.th.start()
         self.th1.start()
         self.th2.start()
+        self.restart_thread.start()
+
+    def restart(self, livesWidget):
+        while True:
+            self.self_pipe.recv()
+            if self.left:
+                pix = QPixmap('Images/ItsAMeRight.png')
+                self.setGeometry(-8, 621, 50, 70)
+            else:
+                pix = QPixmap('Images/ItsAMeLeft.png')
+                self.setGeometry(533, 621, 50, 70)
+            pixx = pix.scaled(QSize(50, 70))
+            self.setPixmap(pixx)
+            livesWidget.lose_life(3)
 
     def check_lives(self, livesWidget, donkey):
         while True:
@@ -111,6 +127,8 @@ class Mover(QLabel):
                 with self.my_obj_rwlock.w_locked():
                     self.pipe.send("restartMap")
                 donkey.setGeometry(262, 112, 70, 80)
+                self.self_pipe.send("Restart")
+                self.power_up_pipe.send("Restart")
                 levelLabel.level_up()
                 self.lives = 3
                 livesWidget.lose_life(self.lives)
@@ -141,7 +159,7 @@ class Mover(QLabel):
                         self.lives = self.lives + 1
                         livesWidget.lose_life(self.lives)
                 self.powerUp.hide()
-                del self.powerUp
+                #del self.powerUp
                 with self.my_obj_rwlock.w_locked():
                     self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY, -8))
             time.sleep(0.5)

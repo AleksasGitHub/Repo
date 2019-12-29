@@ -100,8 +100,10 @@ class MainWindow(QWidget):
         self.hbox.addWidget(self.PowerUpWidget, 1, 1)
 
         ex_pipe, in_pipe = mp.Pipe()
+        player1_pipe, player2_pipe = mp.Pipe()
+        player_pipe, power_up_pipe = mp.Pipe()
 
-        self.powerUp = PowerUp(in_pipe, self.my_obj_rwlock, self.PowerUpWidget)
+        self.powerUp = PowerUp(in_pipe, power_up_pipe, self.my_obj_rwlock, self.PowerUpWidget)
         self.scoreLabel1 = Score(self.ScoreLabel1)
         self.scoreLabel2 = Score(self.ScoreLabel2)
         self.scoreLabel1.setGeometry(19, 48, 100, 38)
@@ -112,8 +114,8 @@ class MainWindow(QWidget):
         self.livesWidget1.setGeometry(9, 4, 100, 70)
         self.livesWidget2.setGeometry(440, 4, 100, 70)
         self.donkey = DonkeyKong(in_pipe, self.hbox, self.my_obj_rwlock, self.DonkeyWidget)
-        self.mover1 = Mover(in_pipe, self.livesWidget1, self.levelLabel, self.donkey, self.scoreLabel1, self.my_obj_rwlock, True, self.powerUp, self.PowerUpWidget, self.MarioWidget)
-        self.mover2 = Mover(in_pipe, self.livesWidget2, self.levelLabel, self.donkey, self.scoreLabel2, self.my_obj_rwlock, False, self.powerUp, self.PowerUpWidget, self.MarioWidget)
+        self.mover1 = Mover(in_pipe, player1_pipe, player_pipe, self.livesWidget1, self.levelLabel, self.donkey, self.scoreLabel1, self.my_obj_rwlock, True, self.powerUp, self.PowerUpWidget, self.MarioWidget)
+        self.mover2 = Mover(in_pipe, player2_pipe, player_pipe, self.livesWidget2, self.levelLabel, self.donkey, self.scoreLabel2, self.my_obj_rwlock, False, self.powerUp, self.PowerUpWidget, self.MarioWidget)
         self.princess = Princess(self.PrincessWidget)
 
         self.process = Map.GameMap(ex_pipe, max_arg=101)

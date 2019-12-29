@@ -90,7 +90,7 @@ class DonkeyKong(QLabel):
                 self.getPosition()
                 self.BarrelWidget = QWidget()
                 self.hbox.addWidget(self.BarrelWidget, 1, 1)
-                #self.barrel = Barrel(self.pipe, self.DonkeyX, self.DonkeyY, self.my_obj_rwlock, self, self.BarrelWidget)
+                self.barrel = Barrel(self.pipe, self.DonkeyX, self.DonkeyY, self.my_obj_rwlock, self, self.BarrelWidget)
                 time.sleep(2)
 
 
@@ -105,8 +105,8 @@ class Barrel(QLabel):
         self.donkey.barrels.append(self)
         self.index = len(self.donkey.barrels) - 1
         with self.my_obj_rwlock.w_locked():
-            self.map[self.BarrelX][self.BarrelY] = self.map[self.BarrelX][self.BarrelY] + 31
-            self.map[self.BarrelX][self.BarrelY + 1] = self.map[self.BarrelX][self.BarrelY + 1] + 31
+            self.pipe.send("write %d %d 31" % (self.BarrelX, self.BarrelY))
+            self.pipe.send("write %d %d 31" % (self.BarrelX, self.BarrelY + 1))
         self.setGeometry(200, 200, 70, 50) # naci prave kordinate
         pix = QPixmap('Images/Barrel.png')
         pixx = pix.scaled(QSize(70, 50))
@@ -114,18 +114,9 @@ class Barrel(QLabel):
         self.th = Thread(target=self.Fall, args=())
         self.th.start()
 
-    def getPosition(self):
-        with self.my_obj_rwlock.w_locked():
-            self.pipe.send('readCoordinates Barrel')
-            s = self.pipe.recv()
-            char = s.split()
-            self.BarrelX = int(char[0])
-            self.BarrelY = int(char[1])
-
     def Fall(self):
-        self.getPosition()
+        #self.getPosition()
         for k in range(0, 27):
-            self.getPosition()
             self.move(self.x() + 18, self.y())
             pix = QPixmap('Images/Barrel.png')
             pixx = pix.scaled(QSize(70, 50))
@@ -134,9 +125,8 @@ class Barrel(QLabel):
             currentBarrelY = self.donkey.barrels[self.index].BarrelY
             with self.my_obj_rwlock.w_locked():
                 if(self.BarrelX < 34):
-                    self.pipe.send("write %d %d 31" % (self.BarrelX + 1, self.BarrelY))
-                    self.pipe.send("write %d %d 31" % (self.BarrelX + 1, self.BarrelY + 1))
-                self.pipe.send("write %d %d -31" % (self.BarrelX, self.BarrelY))
-                self.pipe.send("write %d %d -31" % (self.BarrelX, self.BarrelY))
+                    self.pipe.send("write %d %d 31" % (currentBarrelX + 1, currentBarrelY))
+                    self.pipe.send("write %d %d 31" % (currentBarrelX + 1, currentBarrelY + 1))
+                self.pipe.send("write %d %d -31" % (currentBarrelX, currentBarrelY))
+                self.pipe.send("write %d %d -31" % (currentBarrelX, currentBarrelY + 1))
             time.sleep(0.5)
-            self.getPosition()
