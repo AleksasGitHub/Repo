@@ -15,10 +15,10 @@ from multiprocessing import Process, Pipe
 
 
 class DonkeyKong(QLabel):
-    def __init__(self, pipe: Pipe, hbox, my_obj_rwlock, parent=None):
+    def __init__(self, pipe: Pipe, player_pipe: Pipe, my_obj_rwlock, parent=None):
         super().__init__(parent)
         self.pipe = pipe
-        self.hbox = hbox
+        self.player_pipe = player_pipe
         self.DonkeyX = 0
         self.DonkeyY = 0
         self.setGeometry(262, 112, 70, 80)
@@ -29,6 +29,8 @@ class DonkeyKong(QLabel):
         self.barrels = []
         self.th = Thread(target=self.moveRandom, args=())
         self.th.start()
+        self.player_thread = Thread(target=self.restart, args=())
+        self.player_thread.start()
 
     def getPosition(self):
         with self.my_obj_rwlock.w_locked():
@@ -88,45 +90,68 @@ class DonkeyKong(QLabel):
                 barrelCount = 0
                 barrelRandom = random.randrange(3, 5)
                 self.getPosition()
-                self.BarrelWidget = QWidget()
-                self.hbox.addWidget(self.BarrelWidget, 1, 1)
-                self.barrel = Barrel(self.pipe, self.DonkeyX, self.DonkeyY, self.my_obj_rwlock, self, self.BarrelWidget)
+                for i in range(0, 15):
+                    if not self.barrels[i].falling:
+                        self.barrels[i].StartFalling()
+                        break
                 time.sleep(2)
+
+    def restart(self):
+        while True:
+            self.player_pipe.recv()
+            self.setGeometry(262, 112, 70, 80)
 
 
 class Barrel(QLabel):
-    def __init__(self, pipe: Pipe, donkeyX, donkeyY, my_obj_rwlock, donkey : DonkeyKong, parent = None):
+    def __init__(self, pipe: Pipe, my_obj_rwlock, donkey : DonkeyKong, parent = None):
         super().__init__(parent)
+        self.hide()
         self.pipe = pipe
-        self.BarrelX = donkeyX + 2
-        self.BarrelY = donkeyY + 1
         self.my_obj_rwlock = my_obj_rwlock
         self.donkey = donkey
         self.donkey.barrels.append(self)
         self.index = len(self.donkey.barrels) - 1
+        self.falling = False
+
+    def StartFalling(self):
+        self.falling = True
+        self.show()
+        with self.my_obj_rwlock.w_locked():
+            self.pipe.send("readCoordinates Donkey")
+            s = self.pipe.recv()
+            char = s.split()
+            self.DonkeyX = int(char[0])
+            self.DonkeyY = int(char[1])
+        self.BarrelX = self.DonkeyX + 2
+        self.BarrelY = self.DonkeyY + 1
         with self.my_obj_rwlock.w_locked():
             self.pipe.send("write %d %d 31" % (self.BarrelX, self.BarrelY))
             self.pipe.send("write %d %d 31" % (self.BarrelX, self.BarrelY + 1))
-        self.setGeometry(200, 200, 70, 50) # naci prave kordinate
+        self.setGeometry(self.DonkeyY * 18, 140, 50, 30) # naci prave kordinate
+        with self.my_obj_rwlock.w_locked():
+            self.pipe.send("printMap")
         pix = QPixmap('Images/Barrel.png')
-        pixx = pix.scaled(QSize(70, 50))
+        pixx = pix.scaled(QSize(50, 30))
         self.setPixmap(pixx)
         self.th = Thread(target=self.Fall, args=())
         self.th.start()
 
     def Fall(self):
-        #self.getPosition()
+        currentBarrelX = self.donkey.barrels[self.index].BarrelX
+        currentBarrelY = self.donkey.barrels[self.index].BarrelY
         for k in range(0, 27):
-            self.move(self.x() + 18, self.y())
-            pix = QPixmap('Images/Barrel.png')
-            pixx = pix.scaled(QSize(70, 50))
-            self.setPixmap(pixx)
-            currentBarrelX = self.donkey.barrels[self.index].BarrelX
-            currentBarrelY = self.donkey.barrels[self.index].BarrelY
+            self.move(self.x(), self.y() + 18)
             with self.my_obj_rwlock.w_locked():
-                if(self.BarrelX < 34):
+                if self.BarrelX < 34:
                     self.pipe.send("write %d %d 31" % (currentBarrelX + 1, currentBarrelY))
                     self.pipe.send("write %d %d 31" % (currentBarrelX + 1, currentBarrelY + 1))
+                if k == 26:
+                    self.pipe.send("write %d %d -31" % (currentBarrelX + 1, currentBarrelY))
+                    self.pipe.send("write %d %d -31" % (currentBarrelX + 1, currentBarrelY + 1))
                 self.pipe.send("write %d %d -31" % (currentBarrelX, currentBarrelY))
                 self.pipe.send("write %d %d -31" % (currentBarrelX, currentBarrelY + 1))
+                self.pipe.send("printMap")
+            currentBarrelX += 1
             time.sleep(0.5)
+        self.falling = False
+        self.hide()

@@ -167,7 +167,6 @@ class GameMap(Process):
 
     def write(self, x: int, y: int, value: int):
         self.map[x][y] = self.map[x][y] + value
-        #self.printMap()
 
     def restartMap(self):
         self.map = \

@@ -15,11 +15,12 @@ from multiprocessing import Process, Pipe
 
 
 class Mover(QLabel):
-    def __init__(self, pipe: Pipe, self_pipe: Pipe, power_up_pipe: Pipe, livesWidget, levelLabel, donkeyKong, scoreLabel, my_obj_rwlock, leftPlayer, powerUp, powerUpWidget, parent=None):
+    def __init__(self, pipe: Pipe, self_pipe: Pipe, power_up_pipe: Pipe, donkey_pipe: Pipe, livesWidget, levelLabel, scoreLabel, my_obj_rwlock, leftPlayer, powerUp, powerUpWidget, parent=None):
         super().__init__(parent)
         self.left = leftPlayer
         self.self_pipe = self_pipe
         self.power_up_pipe = power_up_pipe
+        self.donkey_pipe = donkey_pipe
         if self.left:
             pix = QPixmap('Images/ItsAMeRight.png')
             self.playerValue = 3
@@ -39,14 +40,13 @@ class Mover(QLabel):
         self.PlayerY = 0
         self.lives = 3
         self.platformsList = []
-        self.donkey = donkeyKong
         self.scoreLabel = scoreLabel
         self.score = 0
         self.my_obj_rwlock = my_obj_rwlock
         self.lW = livesWidget
         self.levelLabel = levelLabel
-        self.th = Thread(target=self.check_lives, args=(livesWidget, self.donkey,))
-        self.th1 = Thread(target=self.check_level, args=(levelLabel, livesWidget, self.donkey,))
+        self.th = Thread(target=self.check_lives, args=(livesWidget,))
+        self.th1 = Thread(target=self.check_level, args=(levelLabel, livesWidget,))
         self.th2 = Thread(target=self.checkPowerUp, args=(livesWidget,))
         self.restart_thread = Thread(target=self.restart, args=(livesWidget,))
         self.th.start()
@@ -67,7 +67,7 @@ class Mover(QLabel):
             self.setPixmap(pixx)
             livesWidget.lose_life(3)
 
-    def check_lives(self, livesWidget, donkey):
+    def check_lives(self, livesWidget):
         while True:
             self.getPosition()
             with self.my_obj_rwlock.w_locked():
@@ -103,7 +103,7 @@ class Mover(QLabel):
                 self.platformsList = []
             time.sleep(0.5)
 
-    def check_level(self, levelLabel, livesWidget, donkey):
+    def check_level(self, levelLabel, livesWidget):
         while True:
             self.getPosition()
             with self.my_obj_rwlock.w_locked():
@@ -126,7 +126,7 @@ class Mover(QLabel):
                 self.PlayerY = 0
                 with self.my_obj_rwlock.w_locked():
                     self.pipe.send("restartMap")
-                donkey.setGeometry(262, 112, 70, 80)
+                self.donkey_pipe.send("Restart")
                 self.self_pipe.send("Restart")
                 self.power_up_pipe.send("Restart")
                 levelLabel.level_up()

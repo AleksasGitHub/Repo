@@ -6,7 +6,7 @@ from PyQt5.QtGui import QImage, QPalette, QBrush, QPixmap
 from PyQt5.QtCore import QSize, Qt
 from PyQt5 import QtWidgets, QtGui
 from Mover import Mover
-from DonkeyKong import DonkeyKong
+from DonkeyKong import DonkeyKong, Barrel
 from Princess import Princess
 from Lives import Lives
 from  Score import  Score
@@ -88,6 +88,9 @@ class MainWindow(QWidget):
         self.ScoreLabel2 = QLabel("Score: 0", self)
         self.LevelLabel = QLabel("Level ", self)
         self.PowerUpWidget = QWidget()
+        self.barrels = []
+        for i in range(0, 15):
+            self.barrels.append(QWidget())
 
         self.hbox.addWidget(self.ScoreLabel1, 1, 1)
         self.hbox.addWidget(self.ScoreLabel2, 1, 1)
@@ -98,10 +101,13 @@ class MainWindow(QWidget):
         self.hbox.addWidget(self.LivesWidget1, 1, 1)
         self.hbox.addWidget(self.LivesWidget2, 1, 1)
         self.hbox.addWidget(self.PowerUpWidget, 1, 1)
+        for i in range(0, 15):
+            self.hbox.addWidget(self.barrels[i], 1, 1)
 
         ex_pipe, in_pipe = mp.Pipe()
         player1_pipe, player2_pipe = mp.Pipe()
         player_pipe, power_up_pipe = mp.Pipe()
+        player_donkey_pipe, donkey_player_pipe = mp.Pipe()
 
         self.powerUp = PowerUp(in_pipe, power_up_pipe, self.my_obj_rwlock, self.PowerUpWidget)
         self.scoreLabel1 = Score(self.ScoreLabel1)
@@ -113,9 +119,12 @@ class MainWindow(QWidget):
         self.livesWidget2 = Lives(self.LivesWidget2)
         self.livesWidget1.setGeometry(9, 4, 100, 70)
         self.livesWidget2.setGeometry(440, 4, 100, 70)
-        self.donkey = DonkeyKong(in_pipe, self.hbox, self.my_obj_rwlock, self.DonkeyWidget)
-        self.mover1 = Mover(in_pipe, player1_pipe, player_pipe, self.livesWidget1, self.levelLabel, self.donkey, self.scoreLabel1, self.my_obj_rwlock, True, self.powerUp, self.PowerUpWidget, self.MarioWidget)
-        self.mover2 = Mover(in_pipe, player2_pipe, player_pipe, self.livesWidget2, self.levelLabel, self.donkey, self.scoreLabel2, self.my_obj_rwlock, False, self.powerUp, self.PowerUpWidget, self.MarioWidget)
+        self.donkey = DonkeyKong(in_pipe, donkey_player_pipe, self.my_obj_rwlock, self.DonkeyWidget)
+        self.donkey_barrels = []
+        for i in range(0, 15):
+            self.donkey_barrels.append(Barrel(in_pipe, self.my_obj_rwlock, self.donkey, self.barrels[i]))
+        self.mover1 = Mover(in_pipe, player1_pipe, player_pipe, player_donkey_pipe, self.livesWidget1, self.levelLabel, self.scoreLabel1, self.my_obj_rwlock, True, self.powerUp, self.PowerUpWidget, self.MarioWidget)
+        self.mover2 = Mover(in_pipe, player2_pipe, player_pipe, player_donkey_pipe, self.livesWidget2, self.levelLabel, self.scoreLabel2, self.my_obj_rwlock, False, self.powerUp, self.PowerUpWidget, self.MarioWidget)
         self.princess = Princess(self.PrincessWidget)
 
         self.process = Map.GameMap(ex_pipe, max_arg=101)
