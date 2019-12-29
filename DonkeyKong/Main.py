@@ -9,15 +9,17 @@ from Mover import Mover
 from DonkeyKong import DonkeyKong
 from Princess import Princess
 from Lives import Lives
-from Score import Score
+from  Score import  Score
 from Level import Level
-from PowerUp import PowerUp
 import sys
 import time
 from tkinter import *
 import threading
 from threading import Thread
 from RWLock import RWLock
+import multiprocessing as mp
+import Map
+from PowerUp import PowerUp
 
 
 class MainWindow(QWidget):
@@ -25,24 +27,9 @@ class MainWindow(QWidget):
         super().__init__()
         self.setWindowIcon(QtGui.QIcon('Images/doKo.png'))
         self.setWindowTitle("Donkey Kong")
-        self.initUI(True)
+        self.initUI()
 
-    def printMap(self):
-        for x in range(len(self.map)):
-            row = []
-            for y in range(len(self.map[x])):
-                with self.my_obj_rwlock.r_locked():
-                    row.append(self.map[x][y])
-            print(row)
-
-    def initUI(self,firstTime):
-        if (not firstTime):
-            self.ScoreLabelText.hide()
-            self.ScoreLabelText2.hide()
-            self.menuButton.hide()
-            self.scoreLabelMover1.hide()
-            self.scoreLabelMover2.hide()
-            self.scoreLabelResult.hide()
+    def initUI(self):
         self.startButton = QPushButton("New Game", self)
         self.startButton.resize(100, 32)
         self.startButton.setGeometry(130, 600, 100, 32)
@@ -55,48 +42,7 @@ class MainWindow(QWidget):
         self.exitButton.setStyleSheet("background-color: red; color: white; font-size:14px; font: bold System")
         self.exitButton.clicked.connect(self.exit_game)
 
-        self.map = \
-            [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1],
-             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 16, 16, 16, 16, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 16, 16, 16, 16, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 16, 16, 16, 16, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 16, 16, 16, 16, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
-             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 4, 1],
-             [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 4, 1],
-             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
 
         self._height = 600
         self._width = 500
@@ -109,13 +55,11 @@ class MainWindow(QWidget):
         self.setPalette(palette)
 
         self.hbox = QGridLayout()
-        # self.hbox.setHorizontalSpacing(0)
-        # self.hbox.setVerticalSpacing(0)
-        self.hbox.setColumnStretch(1, 6)
-        self.hbox.setRowStretch(1, 6)
+        self.hbox.setHorizontalSpacing(0)
+        self.hbox.setVerticalSpacing(0)
+        self.hbox.setColumnStretch(1, 4)
+        self.hbox.setRowStretch(1, 4)
 
-        self.startButton.show()
-        self.exitButton.show()
         self.setLayout(self.hbox)
 
         self.setGeometry(400, 35, 600, 700)
@@ -155,11 +99,9 @@ class MainWindow(QWidget):
         self.hbox.addWidget(self.LivesWidget2, 1, 1)
         self.hbox.addWidget(self.PowerUpWidget, 1, 1)
 
-        self.x = random.randrange(0, 4)
-        self.y = random.randrange(0, 31)
-        self.map[self.x * 5 + 14][self.y + 1] = self.map[self.x * 5 + 14][self.y + 1] + 8
+        ex_pipe, in_pipe = mp.Pipe()
 
-        self.powerUp = PowerUp(self.x, self.y, self.PowerUpWidget)
+        self.powerUp = PowerUp(in_pipe, self.my_obj_rwlock, self.PowerUpWidget)
         self.scoreLabel1 = Score(self.ScoreLabel1)
         self.scoreLabel2 = Score(self.ScoreLabel2)
         self.scoreLabel1.setGeometry(19, 48, 100, 38)
@@ -169,26 +111,16 @@ class MainWindow(QWidget):
         self.livesWidget2 = Lives(self.LivesWidget2)
         self.livesWidget1.setGeometry(9, 4, 100, 70)
         self.livesWidget2.setGeometry(440, 4, 100, 70)
-        self.donkey = DonkeyKong(self.map, self.hbox, self.my_obj_rwlock, self.DonkeyWidget)
-        self.mover1 = Mover(self.map, self.livesWidget1, self.levelLabel, self.donkey, self.scoreLabel1, self.my_obj_rwlock, True, self.powerUp, self.MarioWidget)
-        self.mover2 = Mover(self.map, self.livesWidget2, self.levelLabel, self.donkey, self.scoreLabel2, self.my_obj_rwlock, False, self.powerUp, self.MarioWidget)
+        self.donkey = DonkeyKong(in_pipe, self.hbox, self.my_obj_rwlock, self.DonkeyWidget)
+        self.mover1 = Mover(in_pipe, self.livesWidget1, self.levelLabel, self.donkey, self.scoreLabel1, self.my_obj_rwlock, True, self.powerUp, self.PowerUpWidget, self.MarioWidget)
+        self.mover2 = Mover(in_pipe, self.livesWidget2, self.levelLabel, self.donkey, self.scoreLabel2, self.my_obj_rwlock, False, self.powerUp, self.PowerUpWidget, self.MarioWidget)
         self.princess = Princess(self.PrincessWidget)
 
-        self.th = Thread(target=self.check_for_game_end)
-        self.th.do_run = True
-        self.th.start()
+        self.process = Map.GameMap(ex_pipe, max_arg=101)
+        self.process.start()
 
         self.mover1.setFocus()
         self.hbox.update()
-
-    def printMap(self):
-        while True:
-            for x in range(len(self.map)):
-                row = []
-                for y in range(len(self.map[x])):
-                    row.append(self.map[x][y])
-                print(row)
-            time.sleep(5)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_R:
@@ -277,6 +209,7 @@ class MainWindow(QWidget):
         self.hbox.update()
         self.setGeometry(400, 35, 600, 700)
         self.show()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -1,22 +1,25 @@
-import math
 import random
-
-from PyQt5.QtWidgets import QWidget, QMainWindow, QPushButton, QHBoxLayout, QApplication, QLabel, QVBoxLayout, QGridLayout, QSizePolicy
-from PyQt5.QtGui import QImage, QPalette, QBrush, QPixmap
-from PyQt5.QtCore import QSize, Qt
-from PyQt5 import QtWidgets, QtGui
-import sys
 import time
-from tkinter import *
-import threading
+from multiprocessing import Pipe
 from threading import Thread
+
+from PyQt5.QtCore import QSize
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QLabel
 
 
 class PowerUp(QLabel):
-    def __init__(self, x, y, parent=None):
+    def __init__(self, pipe: Pipe, my_obj_rwlock, parent=None):
         super().__init__(parent)
-        self.row = 263 + x * 97
-        self.column = 9 + y * 18
+        self.x = random.randrange(0, 4)
+        self.y = random.randrange(0, 31)
+        self.my_obj_rwlock = my_obj_rwlock
+        self.pipe = pipe
+        with self.my_obj_rwlock.w_locked():
+                self.pipe.send("write %d %d 8" % (self.x * 5 + 14, self.y + 1))
+        #self.map[self.x * 5 + 14][self.y + 1] = self.map[self.x * 5 + 14][self.y + 1] + 8
+        self.row = 263 + self.x * 97
+        self.column = 9 + self.y * 18
         self.setGeometry(self.column, self.row, 20, 20)  # 263 + x*97 - redovi; 9 + y*18 - kolone
         self.kill = False
         pix = QPixmap('Images/PowerUp.png')
