@@ -104,6 +104,7 @@ class Mover(QLabel):
                     livesWidget.lose_life(self.lives)
                 #else game over
                 self.platformsList = []
+                self.pipe.send('printMap')
             time.sleep(0.5)
 
     def check_level(self, levelLabel, livesWidget):
@@ -114,8 +115,7 @@ class Mover(QLabel):
                 character1 = int(self.pipe.recv())
                 self.pipe.send("getCharacter %d %d" % (self.PlayerX - 1, self.PlayerY))
                 character2 = int(self.pipe.recv())
-            #if self.map[self.PlayerX][self.PlayerY - 1] == 27 or self.map[self.PlayerX - 1][self.PlayerY+1] == 27 or self.map[self.PlayerX - 1][self.PlayerY -1] == 27 or self.map[self.PlayerX - 1][self.PlayerY-1] == 27:
-            b = character1 == 24 + self.playerValue
+            b = character1 == 24 + self.playerValue or character1 == 24 + self.playerValue + self.otherPlayerValue
             if b:
                 if self.left:
                     pix = QPixmap('Images/ItsAMeRight.png')
@@ -138,6 +138,7 @@ class Mover(QLabel):
                 self.score = self.score + 5
                 self.scoreLabel.change_score(self.score)
                 self.platformsList = []
+                self.pipe.send('printMap')
             time.sleep(0.5)
 
     def checkPowerUp(self, livesWidget):
@@ -167,6 +168,7 @@ class Mover(QLabel):
                 #del self.powerUp
                 with self.my_obj_rwlock.w_locked():
                     self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY, -8))
+                self.pipe.send('printMap')
             time.sleep(0.5)
 
     def getPowerUpPosition(self):
