@@ -150,7 +150,7 @@ class Barrel(QLabel):
                     self.pipe.send("write %d %d -31" % (currentBarrelX + 1, currentBarrelY + 1))
                 self.pipe.send("write %d %d -31" % (currentBarrelX, currentBarrelY))
                 self.pipe.send("write %d %d -31" % (currentBarrelX, currentBarrelY + 1))
-                self.pipe.send("printMap")
+                #self.pipe.send("printMap")
             currentBarrelX += 1
             time.sleep(0.5)
         self.falling = False

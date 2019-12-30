@@ -1,6 +1,5 @@
 import math
 import random
-
 from PyQt5.QtWidgets import QWidget, QMainWindow, QPushButton, QHBoxLayout, QApplication, QLabel, QVBoxLayout, QGridLayout, QSizePolicy
 from PyQt5.QtGui import QImage, QPalette, QBrush, QPixmap
 from PyQt5.QtCore import QSize, Qt
@@ -15,12 +14,14 @@ from multiprocessing import Process, Pipe
 
 
 class Mover(QLabel):
-    def __init__(self, pipe: Pipe, self_pipe: Pipe, power_up_pipe: Pipe, donkey_pipe: Pipe, livesWidget, levelLabel, scoreLabel, my_obj_rwlock, leftPlayer, powerUp, powerUpWidget, parent=None):
+    def __init__(self, pipe: Pipe, self_pipe: Pipe, power_up_pipe: Pipe, donkey_pipe: Pipe, movement_pipe: Pipe, livesWidget, levelLabel, scoreLabel, my_obj_rwlock, leftPlayer, powerUp, powerUpWidget, parent=None):
         super().__init__(parent)
         self.left = leftPlayer
         self.self_pipe = self_pipe
         self.power_up_pipe = power_up_pipe
         self.donkey_pipe = donkey_pipe
+        self.movement_pipe = movement_pipe
+
         if self.left:
             pix = QPixmap('Images/ItsAMeRight.png')
             self.playerValue = 3
@@ -49,10 +50,12 @@ class Mover(QLabel):
         self.th1 = Thread(target=self.check_level, args=(levelLabel, livesWidget,))
         self.th2 = Thread(target=self.checkPowerUp, args=(livesWidget,))
         self.restart_thread = Thread(target=self.restart, args=(livesWidget,))
+        self.movement_thread = Thread(target=self.movePlayer, args=[])
         self.th.start()
         self.th1.start()
         self.th2.start()
         self.restart_thread.start()
+        self.movement_thread.start()
 
     def restart(self, livesWidget):
         while True:
@@ -191,96 +194,95 @@ class Mover(QLabel):
                   self.score = self.score + 1
                   self.scoreLabel.change_score(self.score)
 
-    def keyPressEvent(self, event):
+    def movePlayer(self):
+        while True:
+            direction = self.movement_pipe.recv()
+            '''if self.left:
+                up = "W"
+                down = Qt.Key_Down
+                left = Qt.Key_Left
+                right = Qt.Key_Right
+            else:
+                up = Qt.Key_W
+                down = Qt.Key_S
+                left = Qt.Key_A
+                right = Qt.Key_D'''
 
-        if self.left:
-            up = Qt.Key_Up
-            down = Qt.Key_Down
-            left = Qt.Key_Left
-            right = Qt.Key_Right
-        else:
-            up = Qt.Key_W
-            down = Qt.Key_S
-            left = Qt.Key_A
-            right = Qt.Key_D
-
-        self.getPosition()
-        if event.key() == up:
-            with self.my_obj_rwlock.w_locked():
-                self.pipe.send("getCharacter %d %d" % (self.PlayerX , self.PlayerY))
-                character = int(self.pipe.recv())
-                b = character == 2 + self.playerValue or character == 2 + self.playerValue + self.otherPlayerValue or character == 10 + self.playerValue + self.otherPlayerValue
-            if b:
-                self.move(self.x(), self.y() - 19)
-                self.previousX = self.PlayerX
+            self.getPosition()
+            if direction == "W" or direction == "I":
                 with self.my_obj_rwlock.w_locked():
-                    self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY, -self.playerValue))
-                    self.pipe.send("write %d %d %d" % (self.PlayerX - 2, self.PlayerY, self.playerValue))
-                self.getPosition()
-                self.newX = self.PlayerX
-                self.check_score(self.previousX, self.newX)
-
-        elif event.key() == down:
-            with self.my_obj_rwlock.w_locked():
-                self.pipe.send("printMap")
-            with self.my_obj_rwlock.w_locked():
-                self.pipe.send("getCharacter %d %d" % (self.PlayerX + 1, self.PlayerY))
-                character = int(self.pipe.recv())
-                b = character == 2 or character == 2 + self.otherPlayerValue or character == 10 + self.otherPlayerValue
-            if b:
-            #if self.y() + 19 <= 630:
-               #if self.map[self.PlayerX+1][self.PlayerY] == 5 or self.map[self.PlayerX + 1][self.PlayerY] == 2:
-                self.move(self.x(), self.y() + 19)
-                with self.my_obj_rwlock.w_locked():
-                    self.pipe.send("write %d %d %d" % (self.PlayerX + 1, self.PlayerY, self.playerValue))
-                    self.pipe.send("write %d %d %d" % (self.PlayerX - 1, self.PlayerY, -self.playerValue))
-
-        elif event.key() == left:
-            with self.my_obj_rwlock.w_locked():
-                self.pipe.send("getCharacter %d %d" % (self.PlayerX, self.PlayerY - 1))
-                character = int(self.pipe.recv())
-                b1 = character != 1
-            if b1:
-                with self.my_obj_rwlock.w_locked():
-                    self.pipe.send("getCharacter %d %d" % (self.PlayerX, self.PlayerY))
-                    character1 = int(self.pipe.recv())
-                    self.pipe.send("getCharacter %d %d" % (self.PlayerX + 1, self.PlayerY))
-                    character2 = int(self.pipe.recv())
-                    b2 = ((character2 == 2 and character1 == 2 + self.playerValue) or (character2 == 2 + self.otherPlayerValue and character1 == 2 + self.playerValue) or (character2 == 10 and character1 == 2 + self.playerValue) or (character2 == 10 + self.otherPlayerValue and character1 == 2 + self.playerValue))
-                if not b2:
-                    self.move(self.x() - 18, self.y())
-                    pix = QPixmap('Images/ItsAMeLeft.png')
-                    pixx = pix.scaled(QSize(50, 70))
-                    self.setPixmap(pixx)
+                    self.pipe.send("getCharacter %d %d" % (self.PlayerX , self.PlayerY))
+                    character = int(self.pipe.recv())
+                    b = character == 2 + self.playerValue or character == 2 + self.playerValue + self.otherPlayerValue or character == 10 + self.playerValue + self.otherPlayerValue
+                if b:
+                    self.move(self.x(), self.y() - 19)
+                    self.previousX = self.PlayerX
                     with self.my_obj_rwlock.w_locked():
                         self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY, -self.playerValue))
-                        self.pipe.send("write %d %d %d" % (self.PlayerX-1, self.PlayerY, -self.playerValue))
-                        self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY-1, self.playerValue))
-                        self.pipe.send("write %d %d %d" % (self.PlayerX-1, self.PlayerY-1, self.playerValue))
-        elif event.key() == right:
-            with self.my_obj_rwlock.w_locked():
-                self.pipe.send("getCharacter %d %d" % (self.PlayerX, self.PlayerY + 1))
-                character = self.pipe.recv()
-                b1 = character != 1
-            if b1:
+                        self.pipe.send("write %d %d %d" % (self.PlayerX - 2, self.PlayerY, self.playerValue))
+                    self.getPosition()
+                    self.newX = self.PlayerX
+                    self.check_score(self.previousX, self.newX)
+
+            elif direction == "S" or direction == "K":
                 with self.my_obj_rwlock.w_locked():
-                    self.pipe.send("getCharacter %d %d" % (self.PlayerX, self.PlayerY))
-                    character1 = int(self.pipe.recv())
+                    self.pipe.send("printMap")
+                with self.my_obj_rwlock.w_locked():
                     self.pipe.send("getCharacter %d %d" % (self.PlayerX + 1, self.PlayerY))
-                    character2 = int(self.pipe.recv())
-                    b2 = ((character2 == 2 and character1 == 2 + self.playerValue) or (
-                                character2 == 2 + self.otherPlayerValue and character1 == 2 + self.playerValue) or (
-                                      character2 == 10 and character1 == 2 + self.playerValue) or (
-                                      character2 == 10 + self.otherPlayerValue and character1 == 2 + self.playerValue))
-                if not b2:
-                    self.move(self.x() + 18, self.y())
-                    pix = QPixmap('Images/ItsAMeRight.png')
-                    pixx = pix.scaled(QSize(50, 70))
-                    self.setPixmap(pixx)
+                    character = int(self.pipe.recv())
+                    b = character == 2 or character == 2 + self.otherPlayerValue or character == 10 + self.otherPlayerValue
+                if b:
+                #if self.y() + 19 <= 630:
+                   #if self.map[self.PlayerX+1][self.PlayerY] == 5 or self.map[self.PlayerX + 1][self.PlayerY] == 2:
+                    self.move(self.x(), self.y() + 19)
                     with self.my_obj_rwlock.w_locked():
-                        self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY, -self.playerValue))
+                        self.pipe.send("write %d %d %d" % (self.PlayerX + 1, self.PlayerY, self.playerValue))
                         self.pipe.send("write %d %d %d" % (self.PlayerX - 1, self.PlayerY, -self.playerValue))
-                        self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY + 1, self.playerValue))
-                        self.pipe.send("write %d %d %d" % (self.PlayerX - 1, self.PlayerY + 1, self.playerValue))
-        else:
-            QLabel.keyPressEvent(self, event)
+
+            elif direction == "A" or direction == "J":
+                with self.my_obj_rwlock.w_locked():
+                    self.pipe.send("getCharacter %d %d" % (self.PlayerX, self.PlayerY - 1))
+                    character = int(self.pipe.recv())
+                    b1 = character != 1
+                if b1:
+                    with self.my_obj_rwlock.w_locked():
+                        self.pipe.send("getCharacter %d %d" % (self.PlayerX, self.PlayerY))
+                        character1 = int(self.pipe.recv())
+                        self.pipe.send("getCharacter %d %d" % (self.PlayerX + 1, self.PlayerY))
+                        character2 = int(self.pipe.recv())
+                        b2 = ((character2 == 2 and character1 == 2 + self.playerValue) or (character2 == 2 + self.otherPlayerValue and character1 == 2 + self.playerValue) or (character2 == 10 and character1 == 2 + self.playerValue) or (character2 == 10 + self.otherPlayerValue and character1 == 2 + self.playerValue))
+                    if not b2:
+                        self.move(self.x() - 18, self.y())
+                        pix = QPixmap('Images/ItsAMeLeft.png')
+                        pixx = pix.scaled(QSize(50, 70))
+                        self.setPixmap(pixx)
+                        with self.my_obj_rwlock.w_locked():
+                            self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY, -self.playerValue))
+                            self.pipe.send("write %d %d %d" % (self.PlayerX-1, self.PlayerY, -self.playerValue))
+                            self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY-1, self.playerValue))
+                            self.pipe.send("write %d %d %d" % (self.PlayerX-1, self.PlayerY-1, self.playerValue))
+            elif direction == "D" or direction == "L":
+                with self.my_obj_rwlock.w_locked():
+                    self.pipe.send("getCharacter %d %d" % (self.PlayerX, self.PlayerY + 1))
+                    character = self.pipe.recv()
+                    b1 = character != 1
+                if b1:
+                    with self.my_obj_rwlock.w_locked():
+                        self.pipe.send("getCharacter %d %d" % (self.PlayerX, self.PlayerY))
+                        character1 = int(self.pipe.recv())
+                        self.pipe.send("getCharacter %d %d" % (self.PlayerX + 1, self.PlayerY))
+                        character2 = int(self.pipe.recv())
+                        b2 = ((character2 == 2 and character1 == 2 + self.playerValue) or (
+                                    character2 == 2 + self.otherPlayerValue and character1 == 2 + self.playerValue) or (
+                                          character2 == 10 and character1 == 2 + self.playerValue) or (
+                                          character2 == 10 + self.otherPlayerValue and character1 == 2 + self.playerValue))
+                    if not b2:
+                        self.move(self.x() + 18, self.y())
+                        pix = QPixmap('Images/ItsAMeRight.png')
+                        pixx = pix.scaled(QSize(50, 70))
+                        self.setPixmap(pixx)
+                        with self.my_obj_rwlock.w_locked():
+                            self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY, -self.playerValue))
+                            self.pipe.send("write %d %d %d" % (self.PlayerX - 1, self.PlayerY, -self.playerValue))
+                            self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY + 1, self.playerValue))
+                            self.pipe.send("write %d %d %d" % (self.PlayerX - 1, self.PlayerY + 1, self.playerValue))
