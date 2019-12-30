@@ -117,28 +117,29 @@ class Mover(QLabel):
                 character2 = int(self.pipe.recv())
             b = character1 == 24 + self.playerValue or character1 == 24 + self.playerValue + self.otherPlayerValue
             if b:
-                if self.left:
-                    pix = QPixmap('Images/ItsAMeRight.png')
-                    self.setGeometry(-8, 621, 50, 70)
-                else:
-                    pix = QPixmap('Images/ItsAMeLeft.png')
-                    self.setGeometry(533, 621, 50, 70)
-                pixx = pix.scaled(QSize(50, 70))
-                self.setPixmap(pixx)
-                self.PlayerX = 0
-                self.PlayerY = 0
                 with self.my_obj_rwlock.w_locked():
+                    if self.left:
+                        pix = QPixmap('Images/ItsAMeRight.png')
+                        self.setGeometry(-8, 621, 50, 70)
+                    else:
+                        pix = QPixmap('Images/ItsAMeLeft.png')
+                        self.setGeometry(533, 621, 50, 70)
+                    pixx = pix.scaled(QSize(50, 70))
+                    self.setPixmap(pixx)
+                    self.PlayerX = 0
+                    self.PlayerY = 0
+
                     self.pipe.send("restartMap")
-                self.donkey_pipe.send("Restart")
-                self.self_pipe.send("Restart")
-                self.power_up_pipe.send("Restart")
-                levelLabel.level_up()
-                self.lives = 3
-                livesWidget.lose_life(self.lives)
-                self.score = self.score + 5
-                self.scoreLabel.change_score(self.score)
-                self.platformsList = []
-                self.pipe.send('printMap')
+                    self.donkey_pipe.send("Restart")
+                    self.self_pipe.send("Restart")
+                    self.power_up_pipe.send("Restart")
+                    levelLabel.level_up()
+                    self.lives = 3
+                    livesWidget.lose_life(self.lives)
+                    self.score = self.score + 5
+                    self.scoreLabel.change_score(self.score)
+                    self.platformsList = []
+                    self.pipe.send('printMap')
             time.sleep(0.5)
 
     def checkPowerUp(self, livesWidget):
@@ -149,9 +150,9 @@ class Mover(QLabel):
                 character1 = int(self.pipe.recv())
                 self.pipe.send("getCharacter %d %d" % (self.PlayerX - 1, self.PlayerY))
                 character2 = int(self.pipe.recv())
-            b = (character1 == 8 + self.playerValue or character1 == 10 + self.playerValue or character1 == 8 + self.playerValue + self.otherPlayerValue or character1 == 10 + self.playerValue + self.otherPlayerValue) or \
-                (character2 == 8 + self.playerValue or character2 == 10 + self.playerValue or character2 == 8 + self.playerValue + self.otherPlayerValue or character2 == 10 + self.playerValue + self.otherPlayerValue)
-            if b:
+            b1 = character1 == 8 + self.playerValue or character1 == 10 + self.playerValue or character1 == 8 + self.playerValue + self.otherPlayerValue or character1 == 10 + self.playerValue + self.otherPlayerValue
+            b2 = character2 == 8 + self.playerValue or character2 == 10 + self.playerValue or character2 == 8 + self.playerValue + self.otherPlayerValue or character2 == 10 + self.playerValue + self.otherPlayerValue
+            if b1 or b2:
                 i = random.randrange(0, 101, 1) % 2
                 if i == 0:
                     if self.lives - 1 > 0:
@@ -167,7 +168,10 @@ class Mover(QLabel):
                 self.powerUp.hide()
                 #del self.powerUp
                 with self.my_obj_rwlock.w_locked():
-                    self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY, -8))
+                    if b1:
+                        self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY, -8))
+                    else:
+                        self.pipe.send("write %d %d %d" % (self.PlayerX-1, self.PlayerY, -8))
                 self.pipe.send('printMap')
             time.sleep(0.5)
 

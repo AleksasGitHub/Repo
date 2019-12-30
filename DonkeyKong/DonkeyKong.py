@@ -109,8 +109,8 @@ class DonkeyKong(QLabel):
                 if self.barrels[i].velocity - 0.1 > 0.1:
                     self.barrels[i].velocity = self.barrels[i].velocity - 0.1
                 self.barrels[i].hide()
-            with self.my_obj_rwlock.w_locked():
-                self.pipe.send('deleteBarrels')
+            '''with self.my_obj_rwlock.w_locked():
+                self.pipe.send('deleteBarrels')'''
             time.sleep(1.3)
 
 
