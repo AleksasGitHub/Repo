@@ -44,6 +44,7 @@ class DonkeyKong(QLabel):
     def moveRandom(self):
         barrelCount = 0
         barrelRandom = random.randrange(3, 5)
+        #self.first = True
         while True:
             i = random.randrange(0, 101, 1) % 2
             times = random.randrange(3, 5)
@@ -87,7 +88,8 @@ class DonkeyKong(QLabel):
                             time.sleep(0.3)
                 barrelCount = barrelCount + 1
 
-            if barrelCount == barrelRandom: # and first:
+            if barrelCount == barrelRandom: #and self.first:
+                #self.first = False
                 barrelCount = 0
                 barrelRandom = random.randrange(3, 5)
                 self.getPosition()
@@ -141,8 +143,6 @@ class Barrel(QLabel):
             self.pipe.send("write %d %d 31" % (BarrelX, BarrelY))
             self.pipe.send("write %d %d 31" % (BarrelX, BarrelY + 1))
         self.setGeometry(self.DonkeyY * 18, 140, 50, 30) # naci prave kordinate
-        with self.my_obj_rwlock.w_locked():
-            self.pipe.send("printMap")
         pix = QPixmap('Images/Barrel.png')
         pixx = pix.scaled(QSize(50, 30))
         self.setPixmap(pixx)
@@ -152,19 +152,26 @@ class Barrel(QLabel):
     def Fall(self, BarrelX, BarrelY):
         k = 0
         while self.falling and k < 27:
-            self.move(self.x(), self.y() + 18)
+            if BarrelX > 31:
+                down = 19
+            elif BarrelX > 26:
+                down = 20
+            elif BarrelX > 21:
+                down = 19
+            elif BarrelX > 16:
+                down = 20
+            else:
+                down = 19
+            self.move(self.x(), self.y() + down)
             with self.my_obj_rwlock.w_locked():
                 if BarrelX < 34:
                     self.pipe.send("write %d %d 31" % (BarrelX + 1, BarrelY))
                     self.pipe.send("write %d %d 31" % (BarrelX + 1, BarrelY + 1))
                 self.pipe.send("write %d %d -31" % (BarrelX, BarrelY))
                 self.pipe.send("write %d %d -31" % (BarrelX, BarrelY + 1))
-                #self.pipe.send("printMap")
             BarrelX = BarrelX + 1
             k = k + 1
             time.sleep(self.velocity)
-        with self.my_obj_rwlock.w_locked():
-            self.pipe.send("printMap")
         self.falling = False
         self.hide()
 
