@@ -156,7 +156,9 @@ class Mover(QLabel):
                     if self.lives - 1 > 0:
                         self.lives = self.lives - 1
                         livesWidget.lose_life(self.lives)
-                    # else game over
+                    else:
+                        self.lives = 0
+                        livesWidget.lose_life(self.lives)
                 else:
                     if self.lives + 1 <= 3:
                         self.lives = self.lives + 1
@@ -215,7 +217,17 @@ class Mover(QLabel):
                     character = int(self.pipe.recv())
                     b = character == 2 + self.playerValue or character == 2 + self.playerValue + self.otherPlayerValue or character == 10 + self.playerValue + self.otherPlayerValue
                 if b:
-                    self.move(self.x(), self.y() - 19)
+                    if self.PlayerX > 31:
+                        up = 19
+                    elif self.PlayerX > 26:
+                        up = 20
+                    elif self.PlayerX > 21:
+                        up = 19
+                    elif self.PlayerX > 16:
+                        up = 20
+                    else:
+                        up = 19
+                    self.move(self.x(), self.y() - up)
                     self.previousX = self.PlayerX
                     with self.my_obj_rwlock.w_locked():
                         self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY, -self.playerValue))
@@ -234,7 +246,17 @@ class Mover(QLabel):
                 if b:
                 #if self.y() + 19 <= 630:
                    #if self.map[self.PlayerX+1][self.PlayerY] == 5 or self.map[self.PlayerX + 1][self.PlayerY] == 2:
-                    self.move(self.x(), self.y() + 19)
+                    if self.PlayerX > 31:
+                        down = 19
+                    elif self.PlayerX > 26:
+                        down = 20
+                    elif self.PlayerX > 21:
+                        down = 19
+                    elif self.PlayerX > 16:
+                        down = 20
+                    else:
+                        down = 19
+                    self.move(self.x(), self.y() + down)
                     with self.my_obj_rwlock.w_locked():
                         self.pipe.send("write %d %d %d" % (self.PlayerX + 1, self.PlayerY, self.playerValue))
                         self.pipe.send("write %d %d %d" % (self.PlayerX - 1, self.PlayerY, -self.playerValue))

@@ -28,23 +28,34 @@ class MainWindow(QWidget):
         super().__init__()
         self.setWindowIcon(QtGui.QIcon('Images/doKo.png'))
         self.setWindowTitle("Donkey Kong")
-        self.initUI()
+        firstTime = True
+        self.initUI(firstTime)
 
-    def initUI(self):
+    def initUI(self, firstTime):
         self.game_started = False
+        if not firstTime:
+            self.menuButton.hide()
+
         self.startButton = QPushButton("New Game", self)
         self.startButton.resize(100, 32)
         self.startButton.setGeometry(130, 600, 100, 32)
         self.startButton.setStyleSheet("background-color: green; color: white; font-size:14px; font: bold System")
         self.startButton.clicked.connect(self.on_start)
+        self.startButton.show()
 
         self.exitButton = QPushButton("Exit", self)
         self.exitButton.resize(100, 32)
         self.exitButton.setGeometry(360, 600, 100, 32)
         self.exitButton.setStyleSheet("background-color: red; color: white; font-size:14px; font: bold System")
         self.exitButton.clicked.connect(self.exit_game)
+        self.exitButton.show()
 
-
+        self.menuButton = QPushButton("Menu", self)
+        self.menuButton.resize(100, 32)
+        self.menuButton.setGeometry(230, 500, 100, 32)
+        self.menuButton.setStyleSheet("background-color: green; color: white; font-size:14px; font: bold System")
+        self.menuButton.clicked.connect(lambda: self.initUI(False))
+        self.menuButton.hide()
 
         self._height = 600
         self._width = 500
@@ -165,9 +176,9 @@ class MainWindow(QWidget):
                 widgetToRemove = self.hbox.itemAt(i).widget()
                 self.hbox.removeWidget(widgetToRemove)
                 widgetToRemove.setParent(None)
-            #self.princess.kill = True
-            #self.donkey.kill = True
-            #self.powerUp.kill = True
+            self.princess.kill = True
+            self.donkey.kill = True
+            self.powerUp.kill = True
             self.resultInfo()
 
     def check_for_game_end(self):
@@ -191,21 +202,15 @@ class MainWindow(QWidget):
            time.sleep(0.5)
 
     def resultInfo(self):
+        self.game_started = False
+
         oImage = QImage("Images/black.jpg")
         sImage = oImage.scaled(QSize(600, 700))
         palette = QPalette()
         palette.setBrush(QPalette.Window, QBrush(sImage))
-        print("proba")
-
         self.setPalette(palette)
-        self.menuButton = QPushButton("Menu", self)
-        #self.hbox.addWidget(self.menuButton)
-        self.menuButton.show()
-        self.menuButton.resize(100, 32)
-        self.menuButton.setGeometry(230, 500, 100, 32)
-        self.menuButton.setStyleSheet("background-color: green; color: white; font-size:14px; font: bold System")
-        self.menuButton.clicked.connect(lambda : self.initUI(False))
 
+        self.menuButton.show()
 
         self.ScoreLabelText = QLabel("Score: 0", self)
         self.hbox.addWidget(self.ScoreLabelText, 1, 1)
@@ -243,8 +248,9 @@ class MainWindow(QWidget):
             self.scoreLabelResult.setText("NO WINNER")
 
         self.hbox.update()
-        self.setGeometry(400, 35, 600, 700)
-        self.show()
+        #self.setLayout(self.hbox)
+        #self.setGeometry(400, 35, 600, 700)
+        #self.show()
 
 
 if __name__ == '__main__':
