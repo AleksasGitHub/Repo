@@ -77,6 +77,14 @@ class GameMap(Process):
                 self.restartMap()
             elif char[0] == 'printMap':
                 self.printMap()
+            elif char[0] == 'deleteBarrels':
+                self.deleteBarrels()
+
+    def deleteBarrels(self):
+        for x in range(len(self.map)):
+            for y in range(len(self.map[x])):
+                if 31 <= self.map[x][y] <= 43 or self.map[x][y] == 47:
+                    self.map[x][y] = self.map[x][y] - 31
 
     def printMap(self):
         for x in range(len(self.map)):
