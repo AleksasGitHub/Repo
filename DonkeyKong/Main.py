@@ -34,6 +34,12 @@ class MainWindow(QWidget):
     def initUI(self, firstTime):
         self.game_started = False
         if not firstTime:
+            self.ScoreLabelText.hide()
+            self.ScoreLabelText2.hide()
+            self.menuButton.hide()
+            self.scoreLabelMover1.hide()
+            self.scoreLabelMover2.hide()
+            self.scoreLabelResult.hide()
             self.menuButton.hide()
 
         self.startButton = QPushButton("New Game", self)
@@ -54,7 +60,7 @@ class MainWindow(QWidget):
         self.menuButton.resize(100, 32)
         self.menuButton.setGeometry(230, 500, 100, 32)
         self.menuButton.setStyleSheet("background-color: green; color: white; font-size:14px; font: bold System")
-        self.menuButton.clicked.connect(lambda: self.initUI(False))
+        self.menuButton.clicked.connect(lambda: self.showHideWdigets())
         self.menuButton.hide()
 
         self._height = 600
@@ -76,21 +82,15 @@ class MainWindow(QWidget):
         self.setLayout(self.hbox)
 
         self.setGeometry(400, 35, 600, 700)
+
+        #self.initialize()
+        self.hbox.update()
         self.show()
 
     def exit_game(self):
         self.close()
 
-    def on_start(self):
-        self.game_started = True
-        oImage = QImage("Images/Background2.png")
-        sImage = oImage.scaled(QSize(600, 700))
-        palette = QPalette()
-        palette.setBrush(QPalette.Window, QBrush(sImage))
-        self.setPalette(palette)
-        self.startButton.hide()
-        self.exitButton.hide()
-
+    def initialize(self):
         self.my_obj_rwlock = RWLock()
 
         self.PrincessWidget = QWidget()
@@ -118,14 +118,27 @@ class MainWindow(QWidget):
         for i in range(0, 15):
             self.hbox.addWidget(self.barrels[i], 1, 1)
 
-        ex_pipe, in_pipe = mp.Pipe()
-        player1_pipe, player2_pipe = mp.Pipe()
-        player_pipe, power_up_pipe = mp.Pipe()
-        player_donkey_pipe, donkey_player_pipe = mp.Pipe()
-        player1_movement_pipe, movement_player1_pipe = mp.Pipe()
-        player2_movement_pipe, movement_player2_pipe = mp.Pipe()
+        self.ex_pipe, self.in_pipe = mp.Pipe()
+        self.player1_pipe, self.player2_pipe = mp.Pipe()
+        self.player_pipe, self.power_up_pipe = mp.Pipe()
+        self.player_donkey_pipe, self.donkey_player_pipe = mp.Pipe()
+        self.player1_movement_pipe, self.movement_player1_pipe = mp.Pipe()
+        self.player2_movement_pipe, self.movement_player2_pipe = mp.Pipe()
 
-        self.powerUp = PowerUp(in_pipe, power_up_pipe, self.my_obj_rwlock, self.PowerUpWidget)
+    def showHideWdigets(self):
+        self.scoreLabelResult.show()
+
+    def on_start(self):
+        self.game_started = True
+        oImage = QImage("Images/Background2.png")
+        sImage = oImage.scaled(QSize(600, 700))
+        palette = QPalette()
+        palette.setBrush(QPalette.Window, QBrush(sImage))
+        self.setPalette(palette)
+        self.startButton.hide()
+        self.exitButton.hide()
+        self.initialize()
+        self.powerUp = PowerUp(self.in_pipe, self.power_up_pipe, self.my_obj_rwlock, self.PowerUpWidget)
         self.scoreLabel1 = Score(self.ScoreLabel1)
         self.scoreLabel2 = Score(self.ScoreLabel2)
         self.scoreLabel1.setGeometry(19, 48, 100, 38)
@@ -135,20 +148,21 @@ class MainWindow(QWidget):
         self.livesWidget2 = Lives(self.LivesWidget2)
         self.livesWidget1.setGeometry(9, 4, 100, 70)
         self.livesWidget2.setGeometry(440, 4, 100, 70)
-        self.donkey = DonkeyKong(in_pipe, donkey_player_pipe, self.my_obj_rwlock, self.DonkeyWidget)
+        self.donkey = DonkeyKong(self.in_pipe, self.donkey_player_pipe, self.my_obj_rwlock, self.DonkeyWidget)
         self.donkey_barrels = []
         for i in range(0, 15):
-            self.donkey_barrels.append(Barrel(in_pipe, self.my_obj_rwlock, self.donkey, self.barrels[i]))
-        self.mover1 = Mover(in_pipe, player1_pipe, player_pipe, player_donkey_pipe, player1_movement_pipe, self.livesWidget1, self.levelLabel, self.scoreLabel1, self.my_obj_rwlock, True, self.powerUp, self.PowerUpWidget, self.MarioWidget)
-        self.mover2 = Mover(in_pipe, player2_pipe, player_pipe, player_donkey_pipe, player2_movement_pipe, self.livesWidget2, self.levelLabel, self.scoreLabel2, self.my_obj_rwlock, False, self.powerUp, self.PowerUpWidget, self.MarioWidget)
+            self.donkey_barrels.append(Barrel(self.in_pipe, self.my_obj_rwlock, self.donkey, self.barrels[i]))
+        self.mover1 = Mover(self.in_pipe, self.player1_pipe, self.player_pipe, self.player_donkey_pipe, self.player1_movement_pipe, self.livesWidget1, self.levelLabel, self.scoreLabel1, self.my_obj_rwlock, True, self.powerUp, self.PowerUpWidget, self.MarioWidget)
+        self.mover2 = Mover(self.in_pipe, self.player2_pipe, self.player_pipe, self.player_donkey_pipe, self.player2_movement_pipe, self.livesWidget2, self.levelLabel, self.scoreLabel2, self.my_obj_rwlock, False, self.powerUp, self.PowerUpWidget, self.MarioWidget)
         self.princess = Princess(self.PrincessWidget)
 
-        self.map_process = Map.GameMap(ex_pipe, max_arg=101)
+        self.map_process = Map.GameMap(self.ex_pipe, max_arg=101)
         self.map_process.start()
 
         self.queue = mp.Queue()
-        self.movement_process = Movement.MovementProcess(movement_player1_pipe, movement_player2_pipe, self.queue, max_arg=101)
+        self.movement_process = Movement.MovementProcess(self.movement_player1_pipe, self.movement_player2_pipe, self.queue, max_arg=101)
         self.movement_process.start()
+        self.donkey.setDisabled(True)
         self.hbox.update()
 
     def keyPressEvent(self, event):
@@ -209,7 +223,7 @@ class MainWindow(QWidget):
         palette = QPalette()
         palette.setBrush(QPalette.Window, QBrush(sImage))
         self.setPalette(palette)
-
+        self.hbox.addWidget(self.menuButton,10,10)
         self.menuButton.show()
 
         self.ScoreLabelText = QLabel("Score: 0", self)
