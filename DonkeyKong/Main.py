@@ -28,19 +28,11 @@ class MainWindow(QWidget):
         super().__init__()
         self.setWindowIcon(QtGui.QIcon('Images/doKo.png'))
         self.setWindowTitle("Donkey Kong")
-        firstTime = True
-        self.initUI(firstTime)
+        self.firstTime = True
+        self.initUI()
 
-    def initUI(self, firstTime):
+    def initUI(self):
         self.game_started = False
-        if not firstTime:
-            self.ScoreLabelText.hide()
-            self.ScoreLabelText2.hide()
-            self.menuButton.hide()
-            self.scoreLabelMover1.hide()
-            self.scoreLabelMover2.hide()
-            self.scoreLabelResult.hide()
-            self.menuButton.hide()
 
         self.startButton = QPushButton("New Game", self)
         self.startButton.resize(100, 32)
@@ -60,7 +52,7 @@ class MainWindow(QWidget):
         self.menuButton.resize(100, 32)
         self.menuButton.setGeometry(230, 500, 100, 32)
         self.menuButton.setStyleSheet("background-color: green; color: white; font-size:14px; font: bold System")
-        self.menuButton.clicked.connect(lambda: self.showHideWdigets())
+        self.menuButton.clicked.connect(self.showHideWdigets)
         self.menuButton.hide()
 
         self._height = 600
@@ -83,7 +75,6 @@ class MainWindow(QWidget):
 
         self.setGeometry(400, 35, 600, 700)
 
-        #self.initialize()
         self.hbox.update()
         self.show()
 
@@ -94,7 +85,8 @@ class MainWindow(QWidget):
         self.my_obj_rwlock = RWLock()
 
         self.PrincessWidget = QWidget()
-        self.MarioWidget = QWidget()
+        self.MarioWidget1 = QWidget()
+        self.MarioWidget2 = QWidget()
         self.DonkeyWidget = QWidget()
         self.LivesWidget1 = QWidget()
         self.ScoreLabel1 = QLabel("Score: 0", self)
@@ -110,7 +102,8 @@ class MainWindow(QWidget):
         self.hbox.addWidget(self.ScoreLabel2, 1, 1)
         self.hbox.addWidget(self.LevelLabel, 1, 1)
         self.hbox.addWidget(self.PrincessWidget, 1, 1)
-        self.hbox.addWidget(self.MarioWidget, 1, 1)
+        self.hbox.addWidget(self.MarioWidget1, 1, 1)
+        self.hbox.addWidget(self.MarioWidget2, 1, 1)
         self.hbox.addWidget(self.DonkeyWidget, 1, 1)
         self.hbox.addWidget(self.LivesWidget1, 1, 1)
         self.hbox.addWidget(self.LivesWidget2, 1, 1)
@@ -126,18 +119,36 @@ class MainWindow(QWidget):
         self.player2_movement_pipe, self.movement_player2_pipe = mp.Pipe()
 
     def showHideWdigets(self):
-        self.scoreLabelResult.show()
+        oImage = QImage("Images/dk1.png")
+        sImage = oImage.scaled(QSize(600, 700))
+        palette = QPalette()
+        palette.setBrush(QPalette.Window, QBrush(sImage))
+        self.setPalette(palette)
+        self.hbox.addWidget(self.exitButton, 8, 5)
+        self.exitButton.show()
+        self.hbox.addWidget(self.startButton, 8, 3)
+        self.startButton.show()
+        self.menuButton.hide()
+        self.scoreLabelText.hide()
+        self.scoreLabelText2.hide()
+        self.scoreLabelMover1.hide()
+        self.scoreLabelMover2.hide()
+        self.scoreLabelResult.hide()
 
     def on_start(self):
         self.game_started = True
+
         oImage = QImage("Images/Background2.png")
         sImage = oImage.scaled(QSize(600, 700))
         palette = QPalette()
         palette.setBrush(QPalette.Window, QBrush(sImage))
         self.setPalette(palette)
+
         self.startButton.hide()
         self.exitButton.hide()
+
         self.initialize()
+
         self.powerUp = PowerUp(self.in_pipe, self.power_up_pipe, self.my_obj_rwlock, self.PowerUpWidget)
         self.scoreLabel1 = Score(self.ScoreLabel1)
         self.scoreLabel2 = Score(self.ScoreLabel2)
@@ -152,17 +163,21 @@ class MainWindow(QWidget):
         self.donkey_barrels = []
         for i in range(0, 15):
             self.donkey_barrels.append(Barrel(self.in_pipe, self.my_obj_rwlock, self.donkey, self.barrels[i]))
-        self.mover1 = Mover(self.in_pipe, self.player1_pipe, self.player_pipe, self.player_donkey_pipe, self.player1_movement_pipe, self.livesWidget1, self.levelLabel, self.scoreLabel1, self.my_obj_rwlock, True, self.powerUp, self.PowerUpWidget, self.MarioWidget)
-        self.mover2 = Mover(self.in_pipe, self.player2_pipe, self.player_pipe, self.player_donkey_pipe, self.player2_movement_pipe, self.livesWidget2, self.levelLabel, self.scoreLabel2, self.my_obj_rwlock, False, self.powerUp, self.PowerUpWidget, self.MarioWidget)
+        self.mover1 = Mover(self.in_pipe, self.player1_pipe, self.player_pipe, self.player_donkey_pipe,
+                            self.player1_movement_pipe, self.livesWidget1, self.levelLabel, self.scoreLabel1,
+                            self.my_obj_rwlock, True, self.powerUp, self.PowerUpWidget, self.MarioWidget1)
+        self.mover2 = Mover(self.in_pipe, self.player2_pipe, self.player_pipe, self.player_donkey_pipe,
+                            self.player2_movement_pipe, self.livesWidget2, self.levelLabel, self.scoreLabel2,
+                            self.my_obj_rwlock, False, self.powerUp, self.PowerUpWidget, self.MarioWidget2)
         self.princess = Princess(self.PrincessWidget)
 
         self.map_process = Map.GameMap(self.ex_pipe, max_arg=101)
         self.map_process.start()
 
         self.queue = mp.Queue()
-        self.movement_process = Movement.MovementProcess(self.movement_player1_pipe, self.movement_player2_pipe, self.queue, max_arg=101)
+        self.movement_process = Movement.MovementProcess(self.movement_player1_pipe, self.movement_player2_pipe,
+                                                         self.queue, max_arg=101)
         self.movement_process.start()
-        self.donkey.setDisabled(True)
         self.hbox.update()
 
     def keyPressEvent(self, event):
@@ -186,13 +201,25 @@ class MainWindow(QWidget):
 
 
         if event.key() == Qt.Key_R:
-            for i in reversed(range(self.hbox.count())):
-                widgetToRemove = self.hbox.itemAt(i).widget()
-                self.hbox.removeWidget(widgetToRemove)
-                widgetToRemove.setParent(None)
             self.princess.kill = True
             self.donkey.kill = True
             self.powerUp.kill = True
+            self.PrincessWidget.hide()
+            self.MarioWidget1.hide()
+            self.MarioWidget2.hide()
+            self.DonkeyWidget.hide()
+            self.LivesWidget1.hide()
+            self.ScoreLabel1.hide()
+            self.LivesWidget2.hide()
+            self.ScoreLabel2.hide()
+            self.LevelLabel.hide()
+            self.PowerUpWidget.hide()
+            for i in range(0, 15):
+                self.barrels[i].hide()
+
+            for i in range(0, 15):
+                self.layout().removeWidget(self.barrels[i])
+
             self.resultInfo()
 
     def check_for_game_end(self):
@@ -217,6 +244,7 @@ class MainWindow(QWidget):
 
     def resultInfo(self):
         self.game_started = False
+        self.firstTime = False
 
         oImage = QImage("Images/black.jpg")
         sImage = oImage.scaled(QSize(600, 700))

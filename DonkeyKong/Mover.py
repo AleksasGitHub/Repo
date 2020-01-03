@@ -28,7 +28,7 @@ class Mover(QLabel):
             self.otherPlayerValue = 4
             self.setGeometry(-8, 621, 50, 70)
         else:
-            pix = QPixmap('Images/ItsAMeLeft.png')
+            pix = QPixmap('Images/LuiguiLeft.png')
             self.playerValue = 4
             self.otherPlayerValue = 3
             self.setGeometry(533, 621, 50, 70)
@@ -64,7 +64,7 @@ class Mover(QLabel):
                 pix = QPixmap('Images/ItsAMeRight.png')
                 self.setGeometry(-8, 621, 50, 70)
             else:
-                pix = QPixmap('Images/ItsAMeLeft.png')
+                pix = QPixmap('Images/LuiguiLeft.png')
                 self.setGeometry(533, 621, 50, 70)
             pixx = pix.scaled(QSize(50, 70))
             self.setPixmap(pixx)
@@ -84,7 +84,7 @@ class Mover(QLabel):
                     pix = QPixmap('Images/ItsAMeRight.png')
                     self.setGeometry(-8, 621, 50, 70)
                 else:
-                    pix = QPixmap('Images/ItsAMeLeft.png')
+                    pix = QPixmap('Images/LuiguiLeft.png')
                     self.setGeometry(533, 621, 50, 70)
                 pixx = pix.scaled(QSize(50, 70))
                 self.setPixmap(pixx)
@@ -281,7 +281,10 @@ class Mover(QLabel):
                         b2 = ((character2 == 2 and character1 == 2 + self.playerValue) or (character2 == 2 + self.otherPlayerValue and character1 == 2 + self.playerValue) or (character2 == 10 and character1 == 2 + self.playerValue) or (character2 == 10 + self.otherPlayerValue and character1 == 2 + self.playerValue))
                     if not b2:
                         self.move(self.x() - 18, self.y())
-                        pix = QPixmap('Images/ItsAMeLeft.png')
+                        if self.left:
+                            pix = QPixmap('Images/ItsAMeLeft.png')
+                        else:
+                            pix = QPixmap('Images/LuiguiLeft.png')
                         pixx = pix.scaled(QSize(50, 70))
                         self.setPixmap(pixx)
                         with self.my_obj_rwlock.w_locked():
@@ -306,7 +309,10 @@ class Mover(QLabel):
                                           character2 == 10 + self.otherPlayerValue and character1 == 2 + self.playerValue))
                     if not b2:
                         self.move(self.x() + 18, self.y())
-                        pix = QPixmap('Images/ItsAMeRight.png')
+                        if self.left:
+                            pix = QPixmap('Images/ItsAMeRight.png')
+                        else:
+                            pix = QPixmap('Images/LuiguiRight.png')
                         pixx = pix.scaled(QSize(50, 70))
                         self.setPixmap(pixx)
                         with self.my_obj_rwlock.w_locked():
