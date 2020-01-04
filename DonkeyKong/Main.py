@@ -31,6 +31,7 @@ class MainWindow(QWidget):
         self.firstTime = True
         self.initUI()
 
+
     def initUI(self):
         self.game_started = False
 
@@ -89,10 +90,11 @@ class MainWindow(QWidget):
         self.MarioWidget2 = QWidget()
         self.DonkeyWidget = QWidget()
         self.LivesWidget1 = QWidget()
-        self.ScoreLabel1 = QLabel("Score: 0", self)
+        self.ScoreLabel1 = QLabel("", self)
         self.LivesWidget2 = QWidget()
-        self.ScoreLabel2 = QLabel("Score: 0", self)
-        self.LevelLabel = QLabel("Level ", self)
+        self.ScoreLabel2 = QLabel("", self)
+        self.LevelLabel = QLabel("", self)
+        self.NextLevelLabel = QLabel("", self)
         self.PowerUpWidget = QWidget()
         self.barrels = []
         for i in range(0, 15):
@@ -101,6 +103,7 @@ class MainWindow(QWidget):
         self.hbox.addWidget(self.ScoreLabel1, 1, 1)
         self.hbox.addWidget(self.ScoreLabel2, 1, 1)
         self.hbox.addWidget(self.LevelLabel, 1, 1)
+        self.hbox.addWidget(self.NextLevelLabel, 1, 1)
         self.hbox.addWidget(self.PrincessWidget, 1, 1)
         self.hbox.addWidget(self.MarioWidget1, 1, 1)
         self.hbox.addWidget(self.MarioWidget2, 1, 1)
@@ -138,6 +141,7 @@ class MainWindow(QWidget):
     def on_start(self):
         self.game_started = True
 
+
         oImage = QImage("Images/Background2.png")
         sImage = oImage.scaled(QSize(600, 700))
         palette = QPalette()
@@ -155,6 +159,10 @@ class MainWindow(QWidget):
         self.scoreLabel1.setGeometry(19, 48, 100, 38)
         self.scoreLabel2.setGeometry(450, 48, 100, 38)
         self.levelLabel = Level(self.LevelLabel)
+        self.levelLabel.setGeometry(274, -8, 100, 70)
+        self.next_level = Level(self.NextLevelLabel)
+        self.next_level.setGeometry(160,200,300,300)
+        self.next_level.setText("")
         self.livesWidget1 = Lives(self.LivesWidget1)
         self.livesWidget2 = Lives(self.LivesWidget2)
         self.livesWidget1.setGeometry(9, 4, 100, 70)
@@ -163,10 +171,10 @@ class MainWindow(QWidget):
         self.donkey_barrels = []
         for i in range(0, 15):
             self.donkey_barrels.append(Barrel(self.in_pipe, self.my_obj_rwlock, self.donkey, self.barrels[i]))
-        self.mover1 = Mover(self.in_pipe, self.player1_pipe, self.player_pipe, self.player_donkey_pipe,
+        self.mover1 = Mover(self.next_level,self.in_pipe, self.player1_pipe, self.player_pipe, self.player_donkey_pipe,
                             self.player1_movement_pipe, self.livesWidget1, self.levelLabel, self.scoreLabel1,
                             self.my_obj_rwlock, True, self.powerUp, self.PowerUpWidget, self.MarioWidget1)
-        self.mover2 = Mover(self.in_pipe, self.player2_pipe, self.player_pipe, self.player_donkey_pipe,
+        self.mover2 = Mover(self.next_level,self.in_pipe, self.player2_pipe, self.player_pipe, self.player_donkey_pipe,
                             self.player2_movement_pipe, self.livesWidget2, self.levelLabel, self.scoreLabel2,
                             self.my_obj_rwlock, False, self.powerUp, self.PowerUpWidget, self.MarioWidget2)
         self.princess = Princess(self.PrincessWidget)
@@ -178,6 +186,11 @@ class MainWindow(QWidget):
         self.movement_process = Movement.MovementProcess(self.movement_player1_pipe, self.movement_player2_pipe,
                                                          self.queue, max_arg=101)
         self.movement_process.start()
+
+        self.th = Thread(target=self.check_for_game_end)
+        self.th.do_run = True
+        self.th.start()
+
         self.hbox.update()
 
     def keyPressEvent(self, event):
@@ -228,17 +241,35 @@ class MainWindow(QWidget):
            if(self.mover1.lives==0 and self.mover2.lives==0):
                print("over")
                t.do_run = False
-               #for i in reversed(range(self.hbox.count())):
-                #  self.hbox.itemAt(i).widget().setParent(None)
-               for i in reversed(range(self.hbox.count())):
+               '''for i in reversed(range(self.hbox.count())):
                    widgetToRemove = self.hbox.itemAt(i).widget()
                    self.hbox.removeWidget(widgetToRemove)
                    widgetToRemove.setParent(None)
-               #self.princess.kill = True
-               #self.donkey.kill = True
-               #self.powerUp.kill = True
+               self.princess.kill = True
+               self.donkey.kill = True
+               self.powerUp.kill = True
                self.resultInfo()
-               #self.hbox.update()
+               #self.hbox.update()'''
+               self.princess.kill = True
+               self.donkey.kill = True
+               self.powerUp.kill = True
+               self.PrincessWidget.hide()
+               self.MarioWidget1.hide()
+               self.MarioWidget2.hide()
+               self.DonkeyWidget.hide()
+               self.LivesWidget1.hide()
+               self.ScoreLabel1.hide()
+               self.LivesWidget2.hide()
+               self.ScoreLabel2.hide()
+               self.LevelLabel.hide()
+               self.PowerUpWidget.hide()
+               for i in range(0, 15):
+                   self.barrels[i].hide()
+
+               for i in range(0, 15):
+                   self.layout().removeWidget(self.barrels[i])
+
+               self.resultInfo()
 
            time.sleep(0.5)
 
