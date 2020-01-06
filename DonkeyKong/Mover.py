@@ -104,7 +104,7 @@ class Mover(QLabel):
 
                 if self.lives == 0:
                   self.hide()
-                self.platformsList = []
+                #self.platformsList = []
                 self.pipe.send('printMap')
             time.sleep(0.5)
 

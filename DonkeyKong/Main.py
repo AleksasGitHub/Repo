@@ -29,7 +29,13 @@ class MainWindow(QWidget):
         self.setWindowIcon(QtGui.QIcon('Images/doKo.png'))
         self.setWindowTitle("Donkey Kong")
         self.firstTime = True
+        self.hbox = QGridLayout()
+        self.hbox.setHorizontalSpacing(0)
+        self.hbox.setVerticalSpacing(0)
+        self.hbox.setColumnStretch(1, 4)
+        self.hbox.setRowStretch(1, 4)
         self.initUI()
+
 
 
     def initUI(self):
@@ -56,6 +62,34 @@ class MainWindow(QWidget):
         self.menuButton.clicked.connect(self.showHideWdigets)
         self.menuButton.hide()
 
+        self.ScoreLabelText = QLabel("Score: 0", self)
+        self.scoreLabelText = Score(self.ScoreLabelText)
+        self.scoreLabelText.setGeometry(70, 278, 100, 18)
+        self.scoreLabelText.text(1)
+        self.ScoreLabelText.hide()
+
+        self.ScoreLabelText2 = QLabel("Score: 0", self)
+        self.scoreLabelText2 = Score(self.ScoreLabelText2)
+        self.scoreLabelText2.setGeometry(370, 278, 100, 18)
+        self.scoreLabelText2.text(2)
+        self.ScoreLabelText2.hide()
+
+        self.ScoreLabelMover1 = QLabel("Score: 0", self)
+        self.scoreLabelMover1 = Score(self.ScoreLabelMover1)
+        self.scoreLabelMover1.setGeometry(120, 348, 100, 38)
+        self.ScoreLabelMover1.hide()
+
+        self.ScoreLabelMover2 = QLabel("Score: 0", self)
+        self.scoreLabelMover2 = Score(self.ScoreLabelMover2)
+        self.scoreLabelMover2.setGeometry(420, 348, 100, 38)
+        self.ScoreLabelMover2.hide()
+
+        self.ScoreLabelResult = QLabel("Score: 0", self)
+        self.scoreLabelResult = Score(self.ScoreLabelResult)
+        self.scoreLabelResult.setGeometry(210, 148, 300, 38)
+        self.scoreLabelResult.setStyleSheet("background-color: black; color: red; font-size:18px; font: bold System")
+        self.ScoreLabelResult.hide()
+
         self._height = 600
         self._width = 500
         self.image_size = 18
@@ -66,11 +100,11 @@ class MainWindow(QWidget):
         palette.setBrush(QPalette.Window, QBrush(sImage))
         self.setPalette(palette)
 
-        self.hbox = QGridLayout()
+        '''self.hbox = QGridLayout()
         self.hbox.setHorizontalSpacing(0)
         self.hbox.setVerticalSpacing(0)
         self.hbox.setColumnStretch(1, 4)
-        self.hbox.setRowStretch(1, 4)
+        self.hbox.setRowStretch(1, 4)'''
 
         self.setLayout(self.hbox)
 
@@ -285,41 +319,46 @@ class MainWindow(QWidget):
         self.hbox.addWidget(self.menuButton,10,10)
         self.menuButton.show()
 
-        self.ScoreLabelText = QLabel("Score: 0", self)
+        # self.ScoreLabelText = QLabel("Score: 0", self)
         self.hbox.addWidget(self.ScoreLabelText, 1, 1)
-        self.scoreLabelText = Score(self.ScoreLabelText)
-        self.scoreLabelText.setGeometry(70, 278, 100, 18)
-        self.scoreLabelText.text(1)
-        self.ScoreLabelText2 = QLabel("Score: 0", self)
+        #self.scoreLabelText = Score(self.ScoreLabelText)
+        #self.scoreLabelText.setGeometry(70, 278, 100, 18)
+        #self.scoreLabelText.text(1)
+        self.ScoreLabelText.show()
+
+        #self.ScoreLabelText2 = QLabel("Score: 0", self)
         self.hbox.addWidget(self.ScoreLabelText2, 1, 1)
-        self.scoreLabelText2 = Score(self.ScoreLabelText2)
-        self.scoreLabelText2.setGeometry(370, 278, 100, 18)
-        self.scoreLabelText2.text(2)
+        #self.scoreLabelText2 = Score(self.ScoreLabelText2)
+        #self.scoreLabelText2.setGeometry(370, 278, 100, 18)
+        #self.scoreLabelText2.text(2)
+        self.ScoreLabelText2.show()
 
-        self.ScoreLabelMover1 = QLabel("Score: 0", self)
+        #self.ScoreLabelMover1 = QLabel("Score: 0", self)
         self.hbox.addWidget(self.ScoreLabelMover1, 1, 1)
-        self.scoreLabelMover1 = Score(self.ScoreLabelMover1)
-        self.scoreLabelMover1.setGeometry(120, 348, 100, 38)
+        #self.scoreLabelMover1 = Score(self.ScoreLabelMover1)
+        #self.scoreLabelMover1.setGeometry(120, 348, 100, 38)
         self.scoreLabelMover1.setText(format(str(self.mover1.score)))
+        self.ScoreLabelMover1.show()
 
-        self.ScoreLabelMover2 = QLabel("Score: 0", self)
+        #self.ScoreLabelMover2 = QLabel("Score: 0", self)
         self.hbox.addWidget(self.ScoreLabelMover2, 1, 1)
-        self.scoreLabelMover2 = Score(self.ScoreLabelMover2)
-        self.scoreLabelMover2.setGeometry(420, 348, 100, 38)
+        #self.scoreLabelMover2 = Score(self.ScoreLabelMover2)
+        #self.scoreLabelMover2.setGeometry(420, 348, 100, 38)
         self.scoreLabelMover2.setText(format(str(self.mover2.score)))
+        self.ScoreLabelMover2.show()
 
-        self.ScoreLabelResult = QLabel("Score: 0", self)
+        #self.ScoreLabelResult = QLabel("Score: 0", self)
         self.hbox.addWidget(self.ScoreLabelResult, 1, 1)
-        self.scoreLabelResult = Score(self.ScoreLabelResult)
-        self.scoreLabelResult.setGeometry(210, 148, 300, 38)
-        self.scoreLabelResult.setStyleSheet("background-color: black; color: red; font-size:18px; font: bold System")
+        #self.scoreLabelResult = Score(self.ScoreLabelResult)
+        #self.scoreLabelResult.setGeometry(210, 148, 300, 38)
+        #self.scoreLabelResult.setStyleSheet("background-color: black; color: red; font-size:18px; font: bold System")
         if(self.mover1.score>self.mover2.score):
             self.scoreLabelResult.setText("PLAYER 1 WON")
         elif(self.mover1.score<self.mover2.score):
             self.scoreLabelResult.setText("PLAYER 2 WON")
         else:
             self.scoreLabelResult.setText("NO WINNER")
-
+        self.ScoreLabelResult.show()
         self.hbox.update()
         #self.setLayout(self.hbox)
         #self.setGeometry(400, 35, 600, 700)
