@@ -221,7 +221,7 @@ class MainWindow(QWidget):
                                                          self.queue, max_arg=101)
         self.movement_process.start()
 
-        self.th = Thread(target=self.check_for_game_end)
+        self.th = Thread(target=self.check_for_game_end, args=())
         self.th.do_run = True
         self.th.start()
 
@@ -279,14 +279,15 @@ class MainWindow(QWidget):
                    widgetToRemove = self.hbox.itemAt(i).widget()
                    self.hbox.removeWidget(widgetToRemove)
                    widgetToRemove.setParent(None)
-               self.princess.kill = True
-               self.donkey.kill = True
-               self.powerUp.kill = True
                self.resultInfo()
                #self.hbox.update()'''
                self.princess.kill = True
                self.donkey.kill = True
                self.powerUp.kill = True
+               self.mover1.kill = True
+               self.mover2.kill = True
+               self.map_process.kill = True
+               self.movement_process.kill = True
                self.PrincessWidget.hide()
                self.MarioWidget1.hide()
                self.MarioWidget2.hide()
@@ -302,6 +303,12 @@ class MainWindow(QWidget):
 
                for i in range(0, 15):
                    self.layout().removeWidget(self.barrels[i])
+
+               self.scoreLabelText.show()
+               self.scoreLabelText2.show()
+               self.scoreLabelMover1.show()
+               self.scoreLabelMover2.show()
+               self.scoreLabelResult.show()
 
                self.resultInfo()
 

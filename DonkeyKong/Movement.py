@@ -23,8 +23,9 @@ class MovementProcess(Process):
         self.player1_pipe = player1
         self.player2_pipe = player2
         self.main_process_queue = main_process
+        self.kill = False
 
-        while True:
+        while not self.kill:
             self.movement = self.main_process_queue.get()
             if self.movement == "W" or self.movement == "A" or self.movement == "S" or self.movement == "D":
                 self.player1_pipe.send(self.movement)

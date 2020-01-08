@@ -22,6 +22,7 @@ class Mover(QLabel):
         self.donkey_pipe = donkey_pipe
         self.movement_pipe = movement_pipe
         self.next_level = next_level
+        self.kill = False
         if self.left:
             pix = QPixmap('Images/ItsAMeRight.png')
             self.playerValue = 3
@@ -39,7 +40,8 @@ class Mover(QLabel):
         self.pipe = pipe
         self.PlayerX = 0
         self.PlayerY = 0
-        self.lives = 3
+        self.lives = 1
+        livesWidget.lose_life(self.lives)
         self.platformsList = []
         self.scoreLabel = scoreLabel
         self.score = 0
@@ -58,7 +60,7 @@ class Mover(QLabel):
         self.movement_thread.start()
 
     def restart(self, livesWidget):
-        while True:
+        while not self.kill:
             self.self_pipe.recv()
             if self.left:
                 pix = QPixmap('Images/ItsAMeRight.png')
@@ -71,7 +73,7 @@ class Mover(QLabel):
             livesWidget.lose_life(3)
 
     def check_lives(self, livesWidget):
-        while True:
+        while not self.kill:
             self.getPosition()
             with self.my_obj_rwlock.w_locked():
                 self.pipe.send("getCharacter %d %d" % (self.PlayerX, self.PlayerY))
@@ -109,7 +111,7 @@ class Mover(QLabel):
             time.sleep(0.5)
 
     def check_level(self, levelLabel, livesWidget):
-        while True:
+        while not self.kill:
             self.getPosition()
             with self.my_obj_rwlock.w_locked():
                 self.pipe.send("getCharacter %d %d" % (self.PlayerX, self.PlayerY))
@@ -145,7 +147,7 @@ class Mover(QLabel):
             time.sleep(0.5)
 
     def checkPowerUp(self, livesWidget):
-        while True:
+        while not self.kill:
             self.getPosition()
             with self.my_obj_rwlock.w_locked():
                 self.pipe.send("getCharacter %d %d" % (self.PlayerX, self.PlayerY))
@@ -205,7 +207,7 @@ class Mover(QLabel):
                   self.scoreLabel.change_score(self.score)
 
     def movePlayer(self):
-        while True:
+        while not self.kill:
             direction = self.movement_pipe.recv()
             '''if self.left:
                 up = "W"
