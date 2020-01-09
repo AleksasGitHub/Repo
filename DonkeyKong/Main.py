@@ -512,9 +512,9 @@ class MainWindow(QWidget):
                 self.hbox.addWidget(self.menuButton, 10, 10)
                 self.hbox.addWidget(self.ScoreTournamentEndLabel, 1, 1)
                 if (self.mover1TournamentResult > self.mover2TournamentResult):
-                    self.scoreTournamentEndLabel.setText("PLAYER 1 WON TOURNAMENT")
+                    self.scoreTournamentEndLabel.setText("PLAYER 1 WON THE TOURNAMENT")
                 elif (self.mover1TournamentResult < self.mover2TournamentResult):
-                    self.scoreTournamentEndLabel.setText("PLAYER 2 WON TOURNAMENT")
+                    self.scoreTournamentEndLabel.setText("PLAYER 2 WON THE TOURNAMENT")
                 else:
                     self.scoreTournamentEndLabel.setText("NO WINNER")
                     self.scoreTournamentEndLabel.setGeometry(210, 418, 300, 38)
