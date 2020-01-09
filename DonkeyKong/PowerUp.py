@@ -14,10 +14,14 @@ class PowerUp(QLabel):
         self.my_obj_rwlock = my_obj_rwlock
         self.pipe = pipe
         self.player_pipe = player_pipe
-        self.player_thread = Thread(target=self.restart, args=[])
-        self.player_thread.start()
-        self.start_thread = Thread(target=self.start, args=[])
-        self.start_thread.start()
+        self.kill = False
+        if pipe is None or player_pipe is None or my_obj_rwlock is None:
+            pass
+        else:
+            self.player_thread = Thread(target=self.restart, args=[])
+            self.player_thread.start()
+            self.start_thread = Thread(target=self.start, args=[])
+            self.start_thread.start()
 
     def start(self):
         self.x = random.randrange(0, 4)
@@ -27,7 +31,6 @@ class PowerUp(QLabel):
             time.sleep(0.1)
         with self.my_obj_rwlock.w_locked():
             self.pipe.send("write %d %d 8" % (self.x * 5 + 14, self.y + 1))
-        #self.map[self.x * 5 + 14][self.y + 1] = self.map[self.x * 5 + 14][self.y + 1] + 8
         self.row = 263 + self.x * 97
         self.column = 9 + self.y * 18
         self.setGeometry(self.column, self.row, 20, 20)  # 263 + x*97 - redovi; 9 + y*18 - kolone
@@ -54,3 +57,18 @@ class PowerUp(QLabel):
             self.hide()
             self.start_thread = Thread(target=self.start, args=[])
             self.start_thread.start()
+
+    def setPosition(self, x, y):
+        self.row = 263 + ((int(x) - 14) / 5) * 97
+        self.column = 9 + (int(y) - 1) * 18
+        self.setGeometry(self.column, self.row, 20, 20)
+        pix = QPixmap('Images/PowerUp.png')
+        pixx = pix.scaled(QSize(20, 20))
+        self.setPixmap(pixx)
+        self.show()
+        self.th = Thread(target=self.jump, args=())
+        self.th.start()
+
+    def hideYourself(self):
+        self.kill = True
+        self.hide()

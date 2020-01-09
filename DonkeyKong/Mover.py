@@ -40,24 +40,26 @@ class Mover(QLabel):
         self.pipe = pipe
         self.PlayerX = 0
         self.PlayerY = 0
-        self.lives = 1
-        livesWidget.lose_life(self.lives)
+        self.lives = 3
         self.platformsList = []
         self.scoreLabel = scoreLabel
         self.score = 0
         self.my_obj_rwlock = my_obj_rwlock
         self.lW = livesWidget
         self.levelLabel = levelLabel
-        self.th = Thread(target=self.check_lives, args=(livesWidget,))
-        self.th1 = Thread(target=self.check_level, args=(levelLabel, livesWidget,))
-        self.th2 = Thread(target=self.checkPowerUp, args=(livesWidget,))
-        self.restart_thread = Thread(target=self.restart, args=(livesWidget,))
-        self.movement_thread = Thread(target=self.movePlayer, args=[])
-        self.th.start()
-        self.th1.start()
-        self.th2.start()
-        self.restart_thread.start()
-        self.movement_thread.start()
+        if pipe is None:
+            pass
+        else:
+            self.th = Thread(target=self.check_lives, args=(livesWidget,))
+            self.th1 = Thread(target=self.check_level, args=(levelLabel, livesWidget,))
+            self.th2 = Thread(target=self.checkPowerUp, args=(livesWidget,))
+            self.restart_thread = Thread(target=self.restart, args=(livesWidget,))
+            self.movement_thread = Thread(target=self.movePlayer, args=[])
+            self.th.start()
+            self.th1.start()
+            self.th2.start()
+            self.restart_thread.start()
+            self.movement_thread.start()
 
     def restart(self, livesWidget):
         while not self.kill:
@@ -106,8 +108,6 @@ class Mover(QLabel):
 
                 if self.lives == 0:
                   self.hide()
-                #self.platformsList = []
-                self.pipe.send('printMap')
             time.sleep(0.5)
 
     def check_level(self, levelLabel, livesWidget):
@@ -118,7 +118,7 @@ class Mover(QLabel):
                 character1 = int(self.pipe.recv())
                 self.pipe.send("getCharacter %d %d" % (self.PlayerX - 1, self.PlayerY))
                 character2 = int(self.pipe.recv())
-            b = character1 == 24 + self.playerValue or character1 == 24 + self.playerValue + self.otherPlayerValue
+            b = character1 == 80 + self.playerValue or character1 == 80 + self.playerValue + self.otherPlayerValue
             if b:
                 with self.my_obj_rwlock.w_locked():
                     if self.left:
@@ -176,7 +176,6 @@ class Mover(QLabel):
                         self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY, -8))
                     else:
                         self.pipe.send("write %d %d %d" % (self.PlayerX-1, self.PlayerY, -8))
-                self.pipe.send('printMap')
             time.sleep(0.5)
 
     def getPowerUpPosition(self):
@@ -206,19 +205,32 @@ class Mover(QLabel):
                   self.score = self.score + 1
                   self.scoreLabel.change_score(self.score)
 
+    def move_online_player(self, direction, value):
+        val = int(value)
+        if direction == 'U':
+            self.move(self.x(), self.y() - val)
+        elif direction == 'D':
+            self.move(self.x(), self.y() + val)
+        elif direction == 'R':
+            if self.left:
+                pix = QPixmap('Images/ItsAMeRight.png')
+            else:
+                pix = QPixmap('Images/LuiguiRight.png')
+            pixx = pix.scaled(QSize(50, 70))
+            self.setPixmap(pixx)
+            self.move(self.x() + val, self.y())
+        elif direction == 'L':
+            if self.left:
+                pix = QPixmap('Images/ItsAMeLeft.png')
+            else:
+                pix = QPixmap('Images/LuiguiLeft.png')
+            pixx = pix.scaled(QSize(50, 70))
+            self.setPixmap(pixx)
+            self.move(self.x() - val, self.y())
+
     def movePlayer(self):
         while not self.kill:
             direction = self.movement_pipe.recv()
-            '''if self.left:
-                up = "W"
-                down = Qt.Key_Down
-                left = Qt.Key_Left
-                right = Qt.Key_Right
-            else:
-                up = Qt.Key_W
-                down = Qt.Key_S
-                left = Qt.Key_A
-                right = Qt.Key_D'''
 
             self.getPosition()
             if direction == "W" or direction == "I":
@@ -324,3 +336,54 @@ class Mover(QLabel):
                             self.pipe.send("write %d %d %d" % (self.PlayerX - 1, self.PlayerY, -self.playerValue))
                             self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY + 1, self.playerValue))
                             self.pipe.send("write %d %d %d" % (self.PlayerX - 1, self.PlayerY + 1, self.playerValue))
+
+    def loseLife(self, livesWidget):
+        if self.left:
+            pix = QPixmap('Images/ItsAMeRight.png')
+            self.setGeometry(-8, 621, 50, 70)
+        else:
+            pix = QPixmap('Images/LuiguiLeft.png')
+            self.setGeometry(533, 621, 50, 70)
+        pixx = pix.scaled(QSize(50, 70))
+        self.setPixmap(pixx)
+
+        self.lives = self.lives - 1
+        livesWidget.lose_life(self.lives)
+
+        if self.lives == 0:
+            self.hide()
+        self.platformsList = []
+
+    def gainLifePowerUp(self, livesWidget):
+        if self.lives + 1 <= 3:
+            self.lives = self.lives + 1
+            livesWidget.lose_life(self.lives)
+
+    def loseLifePowerUp(self, livesWidget):
+        if self.lives - 1 >= 0:
+            self.lives = self.lives - 1
+            livesWidget.lose_life(self.lives)
+
+        if self.lives == 0:
+            self.hide()
+            self.platformsList = []
+
+    def updateScore(self, value):
+        self.score = int(value)
+        self.scoreLabel.change_score(value)
+
+    def nextLevel(self, levelLabel, livesWidget):
+        if self.left:
+            pix = QPixmap('Images/ItsAMeRight.png')
+            self.setGeometry(-8, 621, 50, 70)
+        else:
+            pix = QPixmap('Images/LuiguiLeft.png')
+            self.setGeometry(533, 621, 50, 70)
+        pixx = pix.scaled(QSize(50, 70))
+        self.setPixmap(pixx)
+
+        self.lives = 3
+        livesWidget.lose_life(self.lives)
+        if not self.left:
+            levelLabel.level_up()
+            self.next_level.animation()

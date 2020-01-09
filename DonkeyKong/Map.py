@@ -24,9 +24,9 @@ class GameMap(Process):
         self.map = \
             [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
              [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 80, 80, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 80, 80, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 80, 80, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
              [1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1],
              [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 16, 16, 16, 16, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
              [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 16, 16, 16, 16, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
@@ -79,14 +79,6 @@ class GameMap(Process):
                 self.restartMap()
             elif char[0] == 'printMap':
                 self.printMap()
-            '''elif char[0] == 'deleteBarrels':
-                self.deleteBarrels()
-
-    def deleteBarrels(self):
-        for x in range(len(self.map)):
-            for y in range(len(self.map[x])):
-                if 31 <= self.map[x][y] <= 43 or self.map[x][y] == 47:
-                    self.map[x][y] = self.map[x][y] - 31'''
 
     def printMap(self):
         for x in range(len(self.map)):
@@ -104,13 +96,25 @@ class GameMap(Process):
             self.playerDrawn = 0
             for x in range(len(self.map)):
                 for y in range(len(self.map[x])):
-                    if self.map[x][y] == self.playerValue or self.map[x][y] == self.playerValue + 2 or self.map[x][y]\
-                            == self.playerValue + self.otherPlayerValue or self.map[x][y]\
-                            == self.playerValue + self.otherPlayerValue + 2 or self.map[x][y]\
-                            == 16 + self.playerValue or self.map[x][y]\
-                            == self.playerValue + self.otherPlayerValue + 16 or self.map[x][y]\
-                            == 8 + self.playerValue or self.map[x][y] == 31 + self.playerValue or self.map[x][y]\
-                            == 24 + self.playerValue:
+                    if self.map[x][y] == self.playerValue or self.map[x][y] == self.playerValue + 2 or self.map[x][y] \
+                            == self.playerValue + self.otherPlayerValue or self.map[x][y] \
+                            == self.playerValue + self.otherPlayerValue + 2 or self.map[x][y] \
+                            == 16 + self.playerValue or self.map[x][y] \
+                            == self.playerValue + self.otherPlayerValue + 16 or self.map[x][y] \
+                            == 8 + self.playerValue or self.map[x][y] == 8 + self.playerValue + self.otherPlayerValue \
+                            or self.map[x][y] == 31 + self.playerValue or self.map[x][y] == 31 \
+                            + self.playerValue + self.otherPlayerValue or self.map[x][y] \
+                            == 80 + self.playerValue or self.map[x][y] == 80 + self.playerValue + self.otherPlayerValue\
+                            or self.map[x][y] == 18 + self.playerValue or self.map[x][y] == 18 \
+                            + self.playerValue + self.otherPlayerValue or self.map[x][y] == 10 + self.playerValue or \
+                            self.map[x][y] == 10 + self.playerValue + self.otherPlayerValue or self.map[x][y] == 33 + \
+                            self.playerValue or self.map[x][y] == 33 + self.playerValue + self.otherPlayerValue or \
+                            self.map[x][y] == 41 + self.playerValue or self.map[x][y] == 41 + self.playerValue + \
+                            self.otherPlayerValue or self.map[x][y] == 49 + self.playerValue or self.map[x][y] == 49 \
+                            + self.playerValue + self.otherPlayerValue or self.map[x][y] == 39 + \
+                            self.playerValue or self.map[x][y] == 39 + self.playerValue + self.otherPlayerValue or \
+                            self.map[x][y] == 47 + self.playerValue or self.map[x][y] == 47 + self.playerValue + \
+                            self.otherPlayerValue:
                         if self.playerDrawn == 0:
                             self.playerDrawn = 1
                         else:
@@ -124,14 +128,25 @@ class GameMap(Process):
             self.playerDrawn = 0
             for x in range(len(self.map)):
                 for y in range(len(self.map[x])):
-                    if self.map[x][y] == self.playerValue or self.map[x][y] == self.playerValue + 2 or self.map[x][
-                        y] \
+                    if self.map[x][y] == self.playerValue or self.map[x][y] == self.playerValue + 2 or self.map[x][y] \
                             == self.playerValue + self.otherPlayerValue or self.map[x][y] \
                             == self.playerValue + self.otherPlayerValue + 2 or self.map[x][y] \
                             == 16 + self.playerValue or self.map[x][y] \
                             == self.playerValue + self.otherPlayerValue + 16 or self.map[x][y] \
-                            == 8 + self.playerValue or self.map[x][y] == 31 + self.playerValue or self.map[x][y] \
-                            == 24 + self.playerValue:
+                            == 8 + self.playerValue or self.map[x][y] == 8 + self.playerValue + self.otherPlayerValue \
+                            or self.map[x][y] == 31 + self.playerValue or self.map[x][y] == 31 \
+                            + self.playerValue + self.otherPlayerValue or self.map[x][y] \
+                            == 80 + self.playerValue or self.map[x][y] == 80 + self.playerValue + self.otherPlayerValue \
+                            or self.map[x][y] == 18 + self.playerValue or self.map[x][y] == 18 \
+                            + self.playerValue + self.otherPlayerValue or self.map[x][y] == 10 + self.playerValue or \
+                            self.map[x][y] == 10 + self.playerValue + self.otherPlayerValue or self.map[x][y] == 33 + \
+                            self.playerValue or self.map[x][y] == 33 + self.playerValue + self.otherPlayerValue or \
+                            self.map[x][y] == 41 + self.playerValue or self.map[x][y] == 41 + self.playerValue + \
+                            self.otherPlayerValue or self.map[x][y] == 49 + self.playerValue or self.map[x][y] == 49 \
+                            + self.playerValue + self.otherPlayerValue or self.map[x][y] == 39 + \
+                            self.playerValue or self.map[x][y] == 39 + self.playerValue + self.otherPlayerValue or \
+                            self.map[x][y] == 47 + self.playerValue or self.map[x][y] == 47 + self.playerValue + \
+                            self.otherPlayerValue:
                         if self.playerDrawn == 0:
                             self.playerDrawn = 1
                         else:
@@ -142,7 +157,8 @@ class GameMap(Process):
         elif character == "Donkey":
             for x in range(len(self.map)):
                 for y in range(len(self.map[x])):
-                    if self.map[x][y] == 16 or self.map[x][y] == 18:
+                    if self.map[x][y] == 16 or self.map[x][y] == 18 or self.map[x][y] == 21 or self.map[x][y] == 22 or \
+                            self.map[x][y] == 25:
                         self.X = x
                         self.Y = y
                         self.pipe.send("%d %d" % (self.X, self.Y))
@@ -162,9 +178,14 @@ class GameMap(Process):
             for x in range(len(self.map)):
                 for y in range(len(self.map[x])):
                     if self.map[x][y] == 8 or self.map[x][y] == 10 or self.map[x][y] == 8 + self.playerValue or \
-                            self.map[x][y] == 8 + self.otherPlayerValue or self.map[x][y] == 8 + 2 + self.playerValue or \
-                            self.map[x][y] == 8 + 2 + self.otherPlayerValue or self.map[x][y] == \
-                            8 + 2 + self.playerValue + self.otherPlayerValue:
+                            self.map[x][y] == 8 + self.otherPlayerValue or self.map[x][y] == 10 + self.playerValue or \
+                            self.map[x][y] == 10 + self.otherPlayerValue or self.map[x][y] == \
+                            10 + self.playerValue + self.otherPlayerValue or self.map[x][y] == 8 + self.playerValue \
+                            + self.otherPlayerValue or self.map[x][y] == 41 or self.map[x][y] == 41 + self.playerValue \
+                            or self.map[x][y] == 41 + self.otherPlayerValue or self.map[x][y] == 41 + self.playerValue \
+                            + self.otherPlayerValue or self.map[x][y] == 39 or self.map[x][y] == 39 + self.playerValue \
+                            or self.map[x][y] == 39 + self.otherPlayerValue or self.map[x][y] == 39 + self.playerValue \
+                            + self.otherPlayerValue:
                         self.X = x
                         self.Y = y
                         self.pipe.send("%d %d" % (self.X, self.Y))
@@ -182,9 +203,9 @@ class GameMap(Process):
         self.map = \
             [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
              [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 80, 80, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 80, 80, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 80, 80, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
              [1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1],
              [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 16, 16, 16, 16, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
              [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 16, 16, 16, 16, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],

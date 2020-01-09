@@ -9,6 +9,7 @@ from tkinter import *
 import threading
 from threading import Thread
 
+
 class Lives(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
