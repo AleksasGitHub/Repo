@@ -43,6 +43,7 @@ class MainWindow(QWidget):
     def initUI(self):
         self.game_started = False
         self.online_game = False
+        self.tournament = False
 
         self.startButton = QPushButton("New Game", self)
         self.startButton.resize(100, 32)
@@ -65,12 +66,26 @@ class MainWindow(QWidget):
         self.exitButton.clicked.connect(self.exit_game)
         self.exitButton.show()
 
+        self.tournamentButton = QPushButton("Tournament", self)
+        self.tournamentButton.resize(100, 32)
+        self.tournamentButton.setGeometry(230, 600, 100, 32)
+        self.tournamentButton.setStyleSheet("background-color: blue; color: white; font-size:14px; font: bold System")
+        self.tournamentButton.clicked.connect(self.tournament_start)
+        self.tournamentButton.show()
+
         self.menuButton = QPushButton("Menu", self)
         self.menuButton.resize(100, 32)
         self.menuButton.setGeometry(230, 500, 100, 32)
         self.menuButton.setStyleSheet("background-color: green; color: white; font-size:14px; font: bold System")
         self.menuButton.clicked.connect(self.showHideWdigets)
         self.menuButton.hide()
+
+        self.continueButton = QPushButton("Continue", self)
+        self.continueButton.resize(100, 32)
+        self.continueButton.setGeometry(230, 500, 100, 32)
+        self.continueButton.setStyleSheet("background-color: green; color: white; font-size:14px; font: bold System")
+        self.continueButton.clicked.connect(self.on_start)
+        self.continueButton.hide()
 
         self.ScoreLabelText = QLabel("Score: 0", self)
         self.scoreLabelText = Score(self.ScoreLabelText)
@@ -100,6 +115,18 @@ class MainWindow(QWidget):
         self.scoreLabelResult.setStyleSheet("background-color: black; color: red; font-size:18px; font: bold System")
         self.ScoreLabelResult.hide()
 
+        self.ScoreTournamentLabel = QLabel("", self)
+        self.scoreTournamentLabel = Score(self.ScoreTournamentLabel)
+        self.scoreTournamentLabel.setGeometry(240, 500, 300, 38)
+        self.scoreTournamentLabel.setStyleSheet("background-color: black; color: white; font-size:38px; font: bold System")
+        self.ScoreTournamentLabel.hide()
+
+        self.ScoreTournamentEndLabel = QLabel("", self)
+        self.scoreTournamentEndLabel = Score(self.ScoreTournamentEndLabel)
+        self.scoreTournamentEndLabel.setGeometry(140, 418, 300, 38)
+        self.scoreTournamentEndLabel.setStyleSheet("background-color: black; color: white; font-size:18px; font: bold System")
+        self.ScoreTournamentEndLabel.hide()
+
         self._height = 600
         self._width = 500
         self.image_size = 18
@@ -109,12 +136,6 @@ class MainWindow(QWidget):
         palette = QPalette()
         palette.setBrush(QPalette.Window, QBrush(sImage))
         self.setPalette(palette)
-
-        '''self.hbox = QGridLayout()
-        self.hbox.setHorizontalSpacing(0)
-        self.hbox.setVerticalSpacing(0)
-        self.hbox.setColumnStretch(1, 4)
-        self.hbox.setRowStretch(1, 4)'''
 
         self.setLayout(self.hbox)
 
@@ -277,6 +298,7 @@ class MainWindow(QWidget):
         self.player2_movement_pipe, self.movement_player2_pipe = mp.Pipe()
 
     def showHideWdigets(self):
+        self.tournament = False
         oImage = QImage("Images/dk1.png")
         sImage = oImage.scaled(QSize(600, 700))
         palette = QPalette()
@@ -284,16 +306,21 @@ class MainWindow(QWidget):
         self.setPalette(palette)
         self.hbox.addWidget(self.exitButton, 8, 5)
         self.exitButton.show()
+        self.hbox.addWidget(self.tournamentButton, 8, 7)
+        self.tournamentButton.show()
         self.hbox.addWidget(self.startButton, 8, 3)
         self.startButton.show()
         self.hbox.addWidget(self.onlineButton, 8, 1)
         self.onlineButton.show()
         self.menuButton.hide()
+        self.continueButton.hide()
         self.scoreLabelText.hide()
         self.scoreLabelText2.hide()
         self.scoreLabelMover1.hide()
         self.scoreLabelMover2.hide()
         self.scoreLabelResult.hide()
+        self.scoreTournamentLabel.hide()
+        self.scoreTournamentEndLabel.hide()
 
     def initialize_level_and_lives(self):
         self.scoreLabel1 = Score(self.ScoreLabel1)
@@ -314,6 +341,15 @@ class MainWindow(QWidget):
         self.game_started = True
         self.online_game = False
 
+        if self.tournament:
+            self.scoreLabelText.hide()
+            self.scoreLabelText2.hide()
+            self.scoreLabelMover1.hide()
+            self.scoreLabelMover2.hide()
+            self.scoreLabelResult.hide()
+            self.scoreTournamentLabel.hide()
+            self.scoreTournamentEndLabel.hide()
+
         oImage = QImage("Images/Background2.png")
         sImage = oImage.scaled(QSize(600, 700))
         palette = QPalette()
@@ -323,6 +359,8 @@ class MainWindow(QWidget):
         self.startButton.hide()
         self.exitButton.hide()
         self.onlineButton.hide()
+        self.tournamentButton.hide()
+        self.continueButton.hide()
 
         self.initialize()
         self.initialize_pipes()
@@ -342,6 +380,7 @@ class MainWindow(QWidget):
         self.princess = Princess(self.PrincessWidget)
 
         self.map_process = Map.GameMap(self.ex_pipe, max_arg=101)
+        self.map_process.daemon = True
         self.map_process.start()
 
         self.queue = mp.Queue()
@@ -354,6 +393,13 @@ class MainWindow(QWidget):
         self.th.start()
 
         self.hbox.update()
+
+    def tournament_start(self):
+        self.tournament = True
+        self.tournamentCount = 0
+        self.mover1TournamentResult = 0
+        self.mover2TournamentResult = 0
+        self.on_start()
 
     def keyPressEvent(self, event):
         if self.game_started:
@@ -374,41 +420,11 @@ class MainWindow(QWidget):
             elif event.key() == Qt.Key_L:
                 self.queue.put("L")
 
-
-        if event.key() == Qt.Key_R:
-            self.princess.kill = True
-            self.donkey.kill = True
-            self.powerUp.kill = True
-            self.PrincessWidget.hide()
-            self.MarioWidget1.hide()
-            self.MarioWidget2.hide()
-            self.DonkeyWidget.hide()
-            self.LivesWidget1.hide()
-            self.ScoreLabel1.hide()
-            self.LivesWidget2.hide()
-            self.ScoreLabel2.hide()
-            self.LevelLabel.hide()
-            self.PowerUpWidget.hide()
-            for i in range(0, 15):
-                self.barrels[i].hide()
-
-            for i in range(0, 15):
-                self.layout().removeWidget(self.barrels[i])
-
-            self.resultInfo()
-
     def check_for_game_end(self):
         t = threading.currentThread()
         while getattr(t, "do_run", True):
            if self.mover1.lives == 0 and self.mover2.lives == 0:
-               print("over")
                t.do_run = False
-               '''for i in reversed(range(self.hbox.count())):
-                   widgetToRemove = self.hbox.itemAt(i).widget()
-                   self.hbox.removeWidget(widgetToRemove)
-                   widgetToRemove.setParent(None)
-               self.resultInfo()
-               #self.hbox.update()'''
                self.princess.kill = True
                self.donkey.kill = True
                self.powerUp.kill = True
@@ -439,6 +455,10 @@ class MainWindow(QWidget):
                self.scoreLabelMover2.show()
                self.scoreLabelResult.show()
 
+               if self.tournament:
+                   self.scoreTournamentLabel.show()
+                   self.scoreTournamentEndLabel.show()
+
                self.resultInfo()
 
            time.sleep(0.5)
@@ -453,53 +473,58 @@ class MainWindow(QWidget):
         palette = QPalette()
         palette.setBrush(QPalette.Window, QBrush(sImage))
         self.setPalette(palette)
-        self.hbox.addWidget(self.menuButton,10,10)
-        self.menuButton.show()
+        if not self.tournament:
+            self.hbox.addWidget(self.menuButton,10,10)
+            self.menuButton.show()
 
-        # self.ScoreLabelText = QLabel("Score: 0", self)
         self.hbox.addWidget(self.ScoreLabelText, 1, 1)
-        #self.scoreLabelText = Score(self.ScoreLabelText)
-        #self.scoreLabelText.setGeometry(70, 278, 100, 18)
-        #self.scoreLabelText.text(1)
         self.ScoreLabelText.show()
 
-        #self.ScoreLabelText2 = QLabel("Score: 0", self)
         self.hbox.addWidget(self.ScoreLabelText2, 1, 1)
-        #self.scoreLabelText2 = Score(self.ScoreLabelText2)
-        #self.scoreLabelText2.setGeometry(370, 278, 100, 18)
-        #self.scoreLabelText2.text(2)
         self.ScoreLabelText2.show()
 
-        #self.ScoreLabelMover1 = QLabel("Score: 0", self)
         self.hbox.addWidget(self.ScoreLabelMover1, 1, 1)
-        #self.scoreLabelMover1 = Score(self.ScoreLabelMover1)
-        #self.scoreLabelMover1.setGeometry(120, 348, 100, 38)
         self.scoreLabelMover1.setText(format(str(self.mover1.score)))
         self.ScoreLabelMover1.show()
 
-        #self.ScoreLabelMover2 = QLabel("Score: 0", self)
         self.hbox.addWidget(self.ScoreLabelMover2, 1, 1)
-        #self.scoreLabelMover2 = Score(self.ScoreLabelMover2)
-        #self.scoreLabelMover2.setGeometry(420, 348, 100, 38)
         self.scoreLabelMover2.setText(format(str(self.mover2.score)))
         self.ScoreLabelMover2.show()
 
-        #self.ScoreLabelResult = QLabel("Score: 0", self)
         self.hbox.addWidget(self.ScoreLabelResult, 1, 1)
-        #self.scoreLabelResult = Score(self.ScoreLabelResult)
-        #self.scoreLabelResult.setGeometry(210, 148, 300, 38)
-        #self.scoreLabelResult.setStyleSheet("background-color: black; color: red; font-size:18px; font: bold System")
         if(self.mover1.score>self.mover2.score):
+            self.mover1TournamentResult += 1
             self.scoreLabelResult.setText("PLAYER 1 WON")
         elif(self.mover1.score<self.mover2.score):
+            self.mover2TournamentResult += 1
             self.scoreLabelResult.setText("PLAYER 2 WON")
         else:
             self.scoreLabelResult.setText("NO WINNER")
         self.ScoreLabelResult.show()
+
+        if self.tournament:
+            self.tournamentCount += 1
+            self.hbox.addWidget(self.ScoreTournamentLabel, 1, 1)
+            self.scoreTournamentLabel.setText(format(str(self.mover1TournamentResult) + ":" + str(self.mover2TournamentResult)))
+            self.ScoreTournamentLabel.show()
+
+            if(self.tournamentCount == 5):
+                self.hbox.addWidget(self.menuButton, 10, 10)
+                self.hbox.addWidget(self.ScoreTournamentEndLabel, 1, 1)
+                if (self.mover1TournamentResult > self.mover2TournamentResult):
+                    self.scoreTournamentEndLabel.setText("PLAYER 1 WON TOURNAMENT")
+                elif (self.mover1TournamentResult < self.mover2TournamentResult):
+                    self.scoreTournamentEndLabel.setText("PLAYER 2 WON TOURNAMENT")
+                else:
+                    self.scoreTournamentEndLabel.setText("NO WINNER")
+                    self.scoreTournamentEndLabel.setGeometry(210, 418, 300, 38)
+                self.ScoreTournamentEndLabel.show()
+                self.menuButton.show()
+            else:
+                self.hbox.addWidget(self.continueButton, 10, 10)
+                self.continueButton.show()
+
         self.hbox.update()
-        #self.setLayout(self.hbox)
-        #self.setGeometry(400, 35, 600, 700)
-        #self.show()
 
 
 if __name__ == '__main__':

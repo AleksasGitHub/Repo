@@ -165,6 +165,7 @@ class Mover(QLabel):
                     else:
                         self.lives = 0
                         livesWidget.lose_life(self.lives)
+                        self.hide()
                 else:
                     if self.lives + 1 <= 3:
                         self.lives = self.lives + 1
