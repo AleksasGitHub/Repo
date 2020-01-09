@@ -61,14 +61,14 @@ class MainWindow(QWidget):
 
         self.exitButton = QPushButton("Exit", self)
         self.exitButton.resize(100, 32)
-        self.exitButton.setGeometry(360, 600, 100, 32)
+        self.exitButton.setGeometry(248, 650, 100, 32)
         self.exitButton.setStyleSheet("background-color: red; color: white; font-size:14px; font: bold System")
         self.exitButton.clicked.connect(self.exit_game)
         self.exitButton.show()
 
         self.tournamentButton = QPushButton("Tournament", self)
         self.tournamentButton.resize(100, 32)
-        self.tournamentButton.setGeometry(230, 600, 100, 32)
+        self.tournamentButton.setGeometry(360, 600, 100, 32)
         self.tournamentButton.setStyleSheet("background-color: blue; color: white; font-size:14px; font: bold System")
         self.tournamentButton.clicked.connect(self.tournament_start)
         self.tournamentButton.show()
