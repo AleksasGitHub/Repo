@@ -40,8 +40,7 @@ class Mover(QLabel):
         self.pipe = pipe
         self.PlayerX = 0
         self.PlayerY = 0
-        self.lives = 1
-        livesWidget.lose_life(self.lives)
+        self.lives = 3
         self.platformsList = []
         self.scoreLabel = scoreLabel
         self.score = 0
@@ -165,6 +164,7 @@ class Mover(QLabel):
                     else:
                         self.lives = 0
                         livesWidget.lose_life(self.lives)
+                        self.hide()
                 else:
                     if self.lives + 1 <= 3:
                         self.lives = self.lives + 1
