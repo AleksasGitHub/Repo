@@ -176,6 +176,7 @@ class MainWindow(QWidget):
         self.startButton.hide()
         self.exitButton.hide()
         self.onlineButton.hide()
+        self.tournamentButton.hide()
 
         self.initialize()
 
