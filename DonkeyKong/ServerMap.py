@@ -81,9 +81,6 @@ class GameMap(Process):
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 
-        #self.th = Thread(target=self.check_end, args=())
-        #self.th.start()
-
         while not self.kill:
             direction = self.queue.get()
             self.read_queue(direction)
@@ -169,10 +166,18 @@ class GameMap(Process):
                 text = 'P L P ' + str(playerID) + ' AA'
                 for i in range(0, 2):
                     self.conns[i].sendall(text.encode('utf8'))
+                if playerID == 1 and self.livesPlayer1 != 0:
+                    self.livesPlayer1 -= 1
+                elif playerID == 2 and self.livesPlayer2 != 0:
+                    self.livesPlayer2 -= 1
             else:
                 text = 'P G P ' + str(playerID) + ' AA'
                 for i in range(0, 2):
                     self.conns[i].sendall(text.encode('utf8'))
+                if playerID == 1 and self.livesPlayer1 != 3:
+                    self.livesPlayer1 += 1
+                elif playerID == 2 and self.livesPlayer2 != 3:
+                    self.livesPlayer2 += 1
             if b1:
                 self.write(x, y, -8)
             else:
@@ -182,8 +187,7 @@ class GameMap(Process):
                 self.conns[i].sendall(text.encode('utf8'))
 
     def checkLives(self, x, y, legs, head, playerValue, otherPlayerValue, playerID):
-        b = (playerValue + 16 <= legs <= 39 + playerValue and legs != 80 + playerValue) or \
-            (playerValue + 16 <= head <= 39 + playerValue and head != 80 + playerValue)
+        b = (playerValue + 16 <= legs <= 39 + playerValue) or (playerValue + 16 <= head <= 39 + playerValue)
         if b:
             text = 'L L P ' + str(playerID) + ' AA'
             for i in range(0, 2):
@@ -194,12 +198,14 @@ class GameMap(Process):
                 self.write(34, 1, playerValue)
                 self.write(33, 1, playerValue)
                 self.player1LoseLife = True
-                self.livesPlayer1 -= 1
+                if self.livesPlayer1 - 1 >= 0:
+                    self.livesPlayer1 -= 1
             else:
                 self.write(34, 31, playerValue)
                 self.write(33, 31, playerValue)
                 self.player2LoseLife = True
-                self.livesPlayer2 -= 1
+                if self.livesPlayer2 - 1 >= 0:
+                    self.livesPlayer2 -= 1
 
             if self.livesPlayer1 == 0 and self.livesPlayer2 == 0:
                 for i in range(0, 3):
@@ -239,7 +245,7 @@ class GameMap(Process):
                     self.conns[i].sendall(text.encode('utf8'))
             else:
                 self.score2 += 5
-                text = 'Score Player ' + str(playerID) + ' ' + str(self.score2) + ' '
+                text = 'S P ' + str(playerID) + ' ' + str(self.score2) + ' '
                 while len(text) < 10:
                     text += 'A'
                 for i in range(0, 2):
@@ -258,6 +264,10 @@ class GameMap(Process):
 
             self.platforms1 = []
             self.platforms2 = []
+            if self.livesPlayer1 != 0:
+                self.livesPlayer1 = 3
+            if self.livesPlayer2 != 0:
+                self.livesPlayer2 = 3
             self.restartMap()
 
     def moveDonkey(self, direction, x, y):
@@ -318,6 +328,7 @@ class GameMap(Process):
 
         elif direction == "S" or direction == "K":
             character = self.getCharacter(x + 1, y)
+            self.printMap()
             b = character == 2 or character == 2 + otherPlayerValue or character == 10 + otherPlayerValue
             if b:
                 if x > 31:

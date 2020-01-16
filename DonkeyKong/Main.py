@@ -55,7 +55,7 @@ class MainWindow(QWidget):
         self.onlineButton = QPushButton("Online Game", self)
         self.onlineButton.resize(200, 32)
         self.onlineButton.setGeometry(150, 660, 150, 32)
-        self.onlineButton.setStyleSheet("background-color: yellow; color: white; font-size:14px; font: bold System")
+        self.onlineButton.setStyleSheet("background-color: orange; color: white; font-size:14px; font: bold System")
         self.onlineButton.clicked.connect(self.on_online)
         self.onlineButton.show()
 
@@ -250,6 +250,7 @@ class MainWindow(QWidget):
                 self.mover1.nextLevel(self.levelLabel, self.livesWidget1)
                 self.mover2.nextLevel(self.levelLabel, self.livesWidget2)
                 self.donkey.nextLevel()
+                self.powerUp.hide()
             elif char[0] == 'T':
                 self.donkey.throw_barrel(char[2], char[3])
             if "D" not in text:

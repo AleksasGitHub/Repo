@@ -1,6 +1,7 @@
 import math
 import random
-from PyQt5.QtWidgets import QWidget, QMainWindow, QPushButton, QHBoxLayout, QApplication, QLabel, QVBoxLayout, QGridLayout, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QMainWindow, QPushButton, QHBoxLayout, QApplication, QLabel, QVBoxLayout, \
+    QGridLayout, QSizePolicy
 from PyQt5.QtGui import QImage, QPalette, QBrush, QPixmap
 from PyQt5.QtCore import QSize, Qt
 from PyQt5 import QtWidgets, QtGui
@@ -14,7 +15,9 @@ from multiprocessing import Process, Pipe
 
 
 class Mover(QLabel):
-    def __init__(self,next_level, pipe: Pipe, self_pipe: Pipe, power_up_pipe: Pipe, donkey_pipe: Pipe, movement_pipe: Pipe, livesWidget, levelLabel, scoreLabel, my_obj_rwlock, leftPlayer, powerUp, powerUpWidget, parent=None):
+    def __init__(self, next_level, pipe: Pipe, self_pipe: Pipe, power_up_pipe: Pipe, donkey_pipe: Pipe,
+                 movement_pipe: Pipe, livesWidget, levelLabel, scoreLabel, my_obj_rwlock, leftPlayer, powerUp,
+                 powerUpWidget, parent=None):
         super().__init__(parent)
         self.left = leftPlayer
         self.self_pipe = self_pipe
@@ -73,6 +76,7 @@ class Mover(QLabel):
             pixx = pix.scaled(QSize(50, 70))
             self.setPixmap(pixx)
             livesWidget.lose_life(3)
+            self.platformsList = []
 
     def check_lives(self, livesWidget):
         while not self.kill:
@@ -82,7 +86,10 @@ class Mover(QLabel):
                 character1 = int(self.pipe.recv())
                 self.pipe.send("getCharacter %d %d" % (self.PlayerX - 1, self.PlayerY))
                 character2 = int(self.pipe.recv())
-            b = (self.playerValue + 16 <= character2 <= 39 + self.playerValue and character2 != 24 + self.playerValue) or (self.playerValue + 16 <= character1 <= 39 + self.playerValue and character1 != 24 + self.playerValue)
+            b = (self.playerValue + 16 <= character2 <= 39 + self.playerValue or character2 == 47 + self.playerValue
+                 or character2 == 49 + self.playerValue) or (self.playerValue + 16 <= character1 <= 39 +
+                                                             self.playerValue or character1 == 47 + self.playerValue
+                                                             or character1 == 49 + self.playerValue)
             if b:
                 if self.left:
                     pix = QPixmap('Images/ItsAMeRight.png')
@@ -107,7 +114,7 @@ class Mover(QLabel):
                 livesWidget.lose_life(self.lives)
 
                 if self.lives == 0:
-                  self.hide()
+                    self.hide()
             time.sleep(0.5)
 
     def check_level(self, levelLabel, livesWidget):
@@ -154,8 +161,10 @@ class Mover(QLabel):
                 character1 = int(self.pipe.recv())
                 self.pipe.send("getCharacter %d %d" % (self.PlayerX - 1, self.PlayerY))
                 character2 = int(self.pipe.recv())
-            b1 = character1 == 8 + self.playerValue or character1 == 10 + self.playerValue or character1 == 8 + self.playerValue + self.otherPlayerValue or character1 == 10 + self.playerValue + self.otherPlayerValue
-            b2 = character2 == 8 + self.playerValue or character2 == 10 + self.playerValue or character2 == 8 + self.playerValue + self.otherPlayerValue or character2 == 10 + self.playerValue + self.otherPlayerValue
+            b1 = character1 == 8 + self.playerValue or character1 == 10 + self.playerValue or character1 == 8 + \
+                 self.playerValue + self.otherPlayerValue or character1 == 10 + self.playerValue + self.otherPlayerValue
+            b2 = character2 == 8 + self.playerValue or character2 == 10 + self.playerValue or character2 == 8 + \
+                 self.playerValue + self.otherPlayerValue or character2 == 10 + self.playerValue + self.otherPlayerValue
             if b1 or b2:
                 i = random.randrange(0, 101, 1) % 2
                 if i == 0:
@@ -171,12 +180,12 @@ class Mover(QLabel):
                         self.lives = self.lives + 1
                         livesWidget.lose_life(self.lives)
                 self.powerUp.hide()
-                #del self.powerUp
+                # del self.powerUp
                 with self.my_obj_rwlock.w_locked():
                     if b1:
                         self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY, -8))
                     else:
-                        self.pipe.send("write %d %d %d" % (self.PlayerX-1, self.PlayerY, -8))
+                        self.pipe.send("write %d %d %d" % (self.PlayerX - 1, self.PlayerY, -8))
             time.sleep(0.5)
 
     def getPowerUpPosition(self):
@@ -200,11 +209,11 @@ class Mover(QLabel):
 
     def check_score(self, previousX, newX):
         if previousX == 5 or previousX == 10 or previousX == 15 or previousX == 20 or previousX == 25 or previousX == 30:
-            if not(newX == 5 or newX == 10 or newX == 15 or newX == 20 or newX == 25 or newX == 30):
+            if not (newX == 5 or newX == 10 or newX == 15 or newX == 20 or newX == 25 or newX == 30):
                 if previousX not in self.platformsList:
-                  self.platformsList.append(previousX)
-                  self.score = self.score + 1
-                  self.scoreLabel.change_score(self.score)
+                    self.platformsList.append(previousX)
+                    self.score = self.score + 1
+                    self.scoreLabel.change_score(self.score)
 
     def move_online_player(self, direction, value):
         val = int(value)
@@ -236,7 +245,7 @@ class Mover(QLabel):
             self.getPosition()
             if direction == "W" or direction == "I":
                 with self.my_obj_rwlock.w_locked():
-                    self.pipe.send("getCharacter %d %d" % (self.PlayerX , self.PlayerY))
+                    self.pipe.send("getCharacter %d %d" % (self.PlayerX, self.PlayerY))
                     character = int(self.pipe.recv())
                     b = character == 2 + self.playerValue or character == 2 + self.playerValue + self.otherPlayerValue or character == 10 + self.playerValue + self.otherPlayerValue
                 if b:
@@ -267,8 +276,8 @@ class Mover(QLabel):
                     character = int(self.pipe.recv())
                     b = character == 2 or character == 2 + self.otherPlayerValue or character == 10 + self.otherPlayerValue
                 if b:
-                #if self.y() + 19 <= 630:
-                   #if self.map[self.PlayerX+1][self.PlayerY] == 5 or self.map[self.PlayerX + 1][self.PlayerY] == 2:
+                    # if self.y() + 19 <= 630:
+                    # if self.map[self.PlayerX+1][self.PlayerY] == 5 or self.map[self.PlayerX + 1][self.PlayerY] == 2:
                     if self.PlayerX > 31:
                         down = 19
                     elif self.PlayerX > 26:
@@ -295,7 +304,10 @@ class Mover(QLabel):
                         character1 = int(self.pipe.recv())
                         self.pipe.send("getCharacter %d %d" % (self.PlayerX + 1, self.PlayerY))
                         character2 = int(self.pipe.recv())
-                        b2 = ((character2 == 2 and character1 == 2 + self.playerValue) or (character2 == 2 + self.otherPlayerValue and character1 == 2 + self.playerValue) or (character2 == 10 and character1 == 2 + self.playerValue) or (character2 == 10 + self.otherPlayerValue and character1 == 2 + self.playerValue))
+                        b2 = ((character2 == 2 and character1 == 2 + self.playerValue) or (
+                                character2 == 2 + self.otherPlayerValue and character1 == 2 + self.playerValue) or (
+                                      character2 == 10 and character1 == 2 + self.playerValue) or (
+                                      character2 == 10 + self.otherPlayerValue and character1 == 2 + self.playerValue))
                     if not b2:
                         self.move(self.x() - 18, self.y())
                         if self.left:
@@ -306,9 +318,9 @@ class Mover(QLabel):
                         self.setPixmap(pixx)
                         with self.my_obj_rwlock.w_locked():
                             self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY, -self.playerValue))
-                            self.pipe.send("write %d %d %d" % (self.PlayerX-1, self.PlayerY, -self.playerValue))
-                            self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY-1, self.playerValue))
-                            self.pipe.send("write %d %d %d" % (self.PlayerX-1, self.PlayerY-1, self.playerValue))
+                            self.pipe.send("write %d %d %d" % (self.PlayerX - 1, self.PlayerY, -self.playerValue))
+                            self.pipe.send("write %d %d %d" % (self.PlayerX, self.PlayerY - 1, self.playerValue))
+                            self.pipe.send("write %d %d %d" % (self.PlayerX - 1, self.PlayerY - 1, self.playerValue))
             elif direction == "D" or direction == "L":
                 with self.my_obj_rwlock.w_locked():
                     self.pipe.send("getCharacter %d %d" % (self.PlayerX, self.PlayerY + 1))
@@ -321,9 +333,9 @@ class Mover(QLabel):
                         self.pipe.send("getCharacter %d %d" % (self.PlayerX + 1, self.PlayerY))
                         character2 = int(self.pipe.recv())
                         b2 = ((character2 == 2 and character1 == 2 + self.playerValue) or (
-                                    character2 == 2 + self.otherPlayerValue and character1 == 2 + self.playerValue) or (
-                                          character2 == 10 and character1 == 2 + self.playerValue) or (
-                                          character2 == 10 + self.otherPlayerValue and character1 == 2 + self.playerValue))
+                                character2 == 2 + self.otherPlayerValue and character1 == 2 + self.playerValue) or (
+                                      character2 == 10 and character1 == 2 + self.playerValue) or (
+                                      character2 == 10 + self.otherPlayerValue and character1 == 2 + self.playerValue))
                     if not b2:
                         self.move(self.x() + 18, self.y())
                         if self.left:
@@ -348,11 +360,13 @@ class Mover(QLabel):
         pixx = pix.scaled(QSize(50, 70))
         self.setPixmap(pixx)
 
-        self.lives = self.lives - 1
-        livesWidget.lose_life(self.lives)
+        if self.lives != 0:
+            self.lives = self.lives - 1
+            livesWidget.lose_life(self.lives)
 
         if self.lives == 0:
             self.hide()
+
         self.platformsList = []
 
     def gainLifePowerUp(self, livesWidget):
@@ -383,8 +397,10 @@ class Mover(QLabel):
         pixx = pix.scaled(QSize(50, 70))
         self.setPixmap(pixx)
 
-        self.lives = 3
-        livesWidget.lose_life(self.lives)
+        if self.lives != 0:
+            self.lives = 3
+            livesWidget.lose_life(self.lives)
+
         if not self.left:
             levelLabel.level_up()
             self.next_level.animation()
