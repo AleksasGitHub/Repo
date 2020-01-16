@@ -73,6 +73,7 @@ class Mover(QLabel):
             pixx = pix.scaled(QSize(50, 70))
             self.setPixmap(pixx)
             livesWidget.lose_life(3)
+            self.platformsList = []
 
     def check_lives(self, livesWidget):
         while not self.kill:

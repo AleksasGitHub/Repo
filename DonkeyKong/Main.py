@@ -123,7 +123,7 @@ class MainWindow(QWidget):
 
         self.ScoreTournamentEndLabel = QLabel("", self)
         self.scoreTournamentEndLabel = Score(self.ScoreTournamentEndLabel)
-        self.scoreTournamentEndLabel.setGeometry(140, 418, 300, 38)
+        self.scoreTournamentEndLabel.setGeometry(140, 418, 320, 38)
         self.scoreTournamentEndLabel.setStyleSheet("background-color: black; color: white; font-size:18px; font: bold System")
         self.ScoreTournamentEndLabel.hide()
 
